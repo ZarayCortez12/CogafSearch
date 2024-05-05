@@ -1,9 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
+
+import HomePage from "./pages/homePage";
+
 
 function App() {
+
   return (
-    <div>App</div>
-  )
+   <HomePage></HomePage>
+  );
 }
 
-export default App
+export default App;
