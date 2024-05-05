@@ -1,4 +1,16 @@
 import app from "./app.js"
+import db from "./database/db.js";
+import dotenv from "dotenv";
 
-app.listen(4000)
-console.log('Server on port', 4000)
+
+dotenv.config();
+
+
+db.authenticate()
+  .then(() => console.log("Databse connection successful"))
+  .catch((error) => console.log("Connection error: ", error));
+
+  app.listen(
+    process.env.PORT,
+    console.log("Servidor en el puerto " + process.env.PORT)
+  );
