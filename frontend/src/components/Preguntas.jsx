@@ -30,7 +30,7 @@ function Preguntas({ backgroundColor }) {
         <h1 className={`text-3xl text-center mb-10 font-serif font-bold ${textColor}`}>Preguntas sugeridas</h1>
         <div className="flex flex-col">
           <div className="flex items-center space-x-2 mb-5">
-            <IoAddCircle className="text-green-300"/><button onClick={() => handleClick('tristeza')}>¿Qué características presenta una persona cuando se siente triste?</button>
+            <IoAddCircle className="text-green-300"/><button onClick={() => handleClick('Sadness')}>¿Qué características presenta una persona cuando se siente triste?</button>
           </div>
           <div className="flex items-center space-x-2 mb-5">
             <IoAddCircle className="text-green-300"/><h1 className={`text-xl ${textColor}`}>¿Qué mecánicas debe seguir un juego serio si desea promover la atención?</h1>

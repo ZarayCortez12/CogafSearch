@@ -6,8 +6,12 @@ db.authenticate()
   .then(() => console.log("Database connection successful"))
   .catch((error) => console.log("Connection error: ", error));
 
+dotenv.config();
+
 app.listen(
     process.env.PORT,
     console.log("Servidor en el puerto " + process.env.PORT)
 );
+
+
 
