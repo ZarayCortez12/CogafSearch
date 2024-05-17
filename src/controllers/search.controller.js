@@ -7,7 +7,7 @@ import BasicCognitiveFuntionType from "../models/basic_cognitive_fuction_type.js
 import BasicCognitiveFuntion from "../models/basic_cognitive_fuction.js";
 import { where } from "sequelize";
 
-export const searchOne = async (req, res) => {
+export const searchNine = async (req, res) => {
   try {
     const registro = await BasicEmotionType.findOne({
       where: { description: "sadness" },

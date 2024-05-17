@@ -1,7 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import searchRoutes from "./routes/search.routes.js";
+
 import Question from "./models/question.js";
 import { Sequelize } from "sequelize";
 import * as searchController from "./controllers/search.controller.js";
@@ -19,7 +19,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 const methodMap = {
-  1: searchController.searchOne,
+  9: searchController.searchNine,
 };
 
 app.post("/defineQuestion", async (req, res) => {
@@ -68,6 +68,6 @@ app.post("/defineQuestion", async (req, res) => {
   }
 });
 
-app.use("/api", searchRoutes);
+
 
 export default app;
