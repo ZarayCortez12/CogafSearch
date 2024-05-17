@@ -6,28 +6,22 @@ import Characteristic from "../models/characteristic.js";
 import { where } from "sequelize";
 
 export const searchOne = async (req, res) => {
-  const { palabras } = req.body;
-
   try {
     const registro = await BasicEmotionType.findOne({
-      where: { description: palabras },
+      where: { description: "sadness" },
     });
 
     if (!registro) {
-      return res
-        .status(404)
-        .json({
-          message: "No se encontró ningún registro con la descripción dada.",
-        });
+      return res.status(404).json({
+        message: "No se encontró ningún registro con la descripción dada.",
+      });
     }
     const registroAux = await BasicEmotion.findByPk(registro.id);
     if (!registroAux) {
-      return res
-        .status(404)
-        .json({
-          message:
-            "No se encontró ningún registro en BasicEmotion con el ID dado.",
-        });
+      return res.status(404).json({
+        message:
+          "No se encontró ningún registro en BasicEmotion con el ID dado.",
+      });
     }
     const emotion = await Emotion.findOne({ where: { id: registroAux.id } });
 
@@ -48,20 +42,17 @@ export const searchOne = async (req, res) => {
     });
 
     if (caracteristicas.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "No se encontraron características para esta emoción.",
-        });
+      return res.status(404).json({
+        message: "No se encontraron características para esta emoción.",
+      });
     }
 
     const nombresCaracteristicas = caracteristicas
       .map((c) => c["emotion_characteristic-c"].name)
       .join(", ");
-    const mensaje = `Las características para saber que una persona está triste son: ${nombresCaracteristicas}`;
+    const mensaje = `The characteristics to know that a person is sad are: ${nombresCaracteristicas}`;
 
     res.status(200).json({ mensaje });
-
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: error.message });
