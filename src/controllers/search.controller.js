@@ -165,3 +165,33 @@ export const searchEleven = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const searchTwelve = async (req, res) => {
+  try {
+    const registro = await Mechanic_complementary_activity.findAll({
+      where: {
+        mechanic_id: 9,
+      },
+      include: [
+        {
+          model: Complementary_activity,
+          as: "mechanic_complementary_activity-c",
+        },
+      ],
+    });
+    if (registro) {
+      //ciclo para obtener los nombres de las actividades y concatenarlos en un mensaje
+      const actividades = [];
+      for (const actividad of registro) {
+        actividades.push(actividad["mechanic_complementary_activity-c"].name);
+      }
+      const mensaje = `${actividades.join(", ")}`;
+      res.status(200).json(mensaje);
+    } else {
+      res.status(404).json({ message: "Registro no encontrado" });
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
