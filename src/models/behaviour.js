@@ -18,6 +18,9 @@ const Behaviour = sequelize.define("behaviour", {
   event_id: {
     type: Sequelize.INTEGER,
   },
+}, {
+  tableName: 'behaviour', // Especificar el nombre de la tabla aquí
+  timestamps: false
 });
 Behaviour.belongsTo(Characteristic, {
   foreignKey: "characteristic_id",

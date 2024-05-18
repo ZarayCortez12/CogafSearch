@@ -21,6 +21,7 @@ app.use(express.json());
 
 app.use("/search", RouterSearchEleven);
 const methodMap = {
+  1: searchController.searchOne,
   9: searchController.searchNine,
   10: searchController.searchTen,
 };
