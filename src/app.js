@@ -19,6 +19,7 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 const methodMap = {
+  1: searchController.searchOne,
   9: searchController.searchNine,
   10: searchController.searchTen,
 };
