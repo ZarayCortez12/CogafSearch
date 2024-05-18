@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import  RouterSearchEleven  from "./routes/search.routes.js";
 
 import Question from "./models/question.js";
 import { Sequelize } from "sequelize";
@@ -18,6 +19,7 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json());
 
+app.use("/search", RouterSearchEleven);
 const methodMap = {
   9: searchController.searchNine,
   10: searchController.searchTen,
