@@ -7,7 +7,7 @@ const Basic_cognitive_fuction = sequelize.define("basic_cognitive_function", {
     type: Sequelize.INTEGER,
     primaryKey: true,
   },
-  basic_cognitive_fuction_type_id: {
+  basic_cognitive_function_type_id: {
     type: Sequelize.INTEGER,
     allowNull: true,
   },
@@ -15,6 +15,6 @@ const Basic_cognitive_fuction = sequelize.define("basic_cognitive_function", {
   tableName: 'basic_cognitive_function', // Especificar el nombre de la tabla aquí
   timestamps: false
 });
-Basic_cognitive_fuction.belongsTo(Basic_cognitive_fuction_type, { foreignKey: 'basic_cognitive_fuction_type_id', targetKey: 'id', as: 'b-cognitive-fuction_b-cognitive-fuction-type' });
+Basic_cognitive_fuction.belongsTo(Basic_cognitive_fuction_type, { foreignKey: 'basic_cognitive_function_type_id', targetKey: 'id', as: 'b-cognitive-function_b-cognitive-function-type' });
 
 export default Basic_cognitive_fuction;

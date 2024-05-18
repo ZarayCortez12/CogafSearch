@@ -20,6 +20,7 @@ app.use(express.json());
 
 const methodMap = {
   9: searchController.searchNine,
+  10: searchController.searchTen,
 };
 
 app.post("/defineQuestion", async (req, res) => {

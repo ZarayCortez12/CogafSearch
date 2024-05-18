@@ -11,5 +11,10 @@ const Complementary_activity = sequelize.define("complementary_activity", {
     type: Sequelize.STRING,
     allowNull: true,
   },
-});
+},
+{
+  tableName: "complementary_activity", // Especificar el nombre de la tabla aquí
+  timestamps: false,
+}
+);
 export default Complementary_activity;

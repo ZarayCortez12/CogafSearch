@@ -4,7 +4,7 @@ import Mechanic from "./mechanic.js";
 import Complementary_activity from "./complementary_activity.js";
 
 const Mechanic_complementary_activity = sequelize.define(
-  "mechanic_complementary_activity",
+  "mechanic_complemetary_activity",
   {
     mechanic_id: {
       type: Sequelize.INTEGER,
@@ -14,8 +14,10 @@ const Mechanic_complementary_activity = sequelize.define(
       type: Sequelize.INTEGER,
       primaryKey: true,
     },
-  }
-);
+  }, {
+    tableName: 'mechanic_complemetary_activity', // Especificar el nombre de la tabla aquí
+    timestamps: false
+  });
 
 Mechanic_complementary_activity.belongsTo(Mechanic, {
   foreignKey: "mechanic_id",

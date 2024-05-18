@@ -10,5 +10,8 @@ const Mechanic = sequelize.define("mechanic", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+}, {
+  tableName: 'mechanic', // Especificar el nombre de la tabla aquí
+  timestamps: false
 });
 export default Mechanic;
