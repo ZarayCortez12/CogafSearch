@@ -300,6 +300,73 @@ export const searchFour = async (req, res) => {
   }
 };
 
+export const searchFive = async (req, res) => {
+  try {
+    const registro = await SecondaryEmotionType.findOne({
+      where: { description: "Nostalgia" },
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontró ningún registro con la descripción dada.",
+      });
+    }
+
+    const registroAux = await SecondaryEmotion.findOne({
+      where: { secondary_emotion_type_id: registro.id },
+    });
+
+    if (!registroAux) {
+      return res.status(404).json({
+        message:
+          "No se encontró ningún registro en BasicEmotion con el ID dado.",
+      });
+    }
+
+    const emotion = await Emotion.findOne({ where: { id: registroAux.id } });
+
+    if (!emotion) {
+      return res
+        .status(404)
+        .json({ message: "No se encontró ninguna emoción con el ID dado." });
+    }
+
+    const caracteristicas = await EmotionCharacterist.findAll({
+      where: { emotion_id: emotion.id },
+      include: [
+        {
+          model: Characteristic,
+          as: "emotion_characteristic-c",
+        },
+      ],
+    });
+
+    if (caracteristicas.length === 0) {
+      return res.status(404).json({
+        message: "No se encontraron características para esta emoción.",
+      });
+    }
+
+    const nombresCaracteristicas = caracteristicas.map(
+      (c) => c["emotion_characteristic-c"].name
+    );
+
+    let mensaje;
+    if (nombresCaracteristicas.length > 1) {
+      const lastCharacteristic = nombresCaracteristicas.pop();
+      const joinedCharacteristics = nombresCaracteristicas.join(", ");
+      mensaje = `The emotion of nostalgia has these following characteristics: ${joinedCharacteristics} and ${lastCharacteristic}`;
+    } else {
+      mensaje = `The emotion of nostalgia has these following characteristics: ${nombresCaracteristicas[0]}`;
+    }
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const searchNine = async (req, res) => {
   try {
     const registro = await BasicEmotionType.findOne({
