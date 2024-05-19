@@ -23,8 +23,21 @@ app.use("/search", RouterSearchEleven);
 const methodMap = {
   1: searchController.searchOne,
   2: searchController.searchTwo,
+  3: searchController.searchThree,
+  4: searchController.searchFour,
+  5: searchController.searchFive,
   9: searchController.searchNine,
   10: searchController.searchTen,
+  11: searchController.searchEleven,
+  12: searchController.searchTwelve,
+  13: searchController.searchThirteen,
+  14: searchController.searchFourteen,
+  15: searchController.searchFifteen,
+  16: searchController.searchSixteen,
+  17: searchController.searchSeventeen,
+  18: searchController.searchEighteen,
+  19: searchController.searchNineteen,
+  20: searchController.searchTewenty,
 };
 
 app.post("/defineQuestion", async (req, res) => {

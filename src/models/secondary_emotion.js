@@ -11,6 +11,9 @@ const Secondary_emotion = sequelize.define("secondary_emotion", {
     type: Sequelize.INTEGER,
     allowNull: true,
   },
+}, {
+  tableName: 'secondary_emotion', // Especificar el nombre de la tabla aquí
+  timestamps: false
 });
 Secondary_emotion.belongsTo(Secondary_emotion_type, { foreignKey: 'secondary_emotion_type_id', targetKey: 'id', as: 's-emotion_s-emotion-type' });
 
