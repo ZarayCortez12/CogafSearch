@@ -15,6 +15,9 @@ const Psychological_task_cognitive_test = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+  },{
+    timestamps: false,
+    tableName: "psychological_task_cognitive_test",
   }
 );
 

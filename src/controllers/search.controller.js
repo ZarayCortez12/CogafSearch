@@ -16,6 +16,9 @@ import Complementary_activity from "../models/complementary_activity.js";
 import Mechanic from "../models/mechanic.js";
 import Mechanic_complementary_activity from "../models/mechanic_complementary_activity.js";
 import Behaviour from "../models/behaviour.js";
+import PsychologicalTask from "../models/psychological_task.js";
+import CognitiveTest from "../models/cognitive_test.js";
+import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 
 export const searchOne = async (req, res) => {
   try {
@@ -264,15 +267,47 @@ export const searchThirteen = async (req, res) => {
     });
     if (!registroOne || !registroTwo) {
       return res.status(404).json({
-        message:
-          "No se encontraron registros con los IDs dados.",
+        message: "No se encontraron registros con los IDs dados.",
       });
     }
 
-    const mensaje = `Due to feelings of ${registroOne.description}, ${registroTwo.map(r => r.description).join(", ")}`;
+    const mensaje = `Due to feelings of ${
+      registroOne.description
+    }, ${registroTwo.map((r) => r.description).join(", ")}`;
 
+    res.status(200).json({ mensaje: "Registros encontrados", mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
-    res.status(200).json({ mensaje: "Registros encontrados" , mensaje });
+export const searchFourteen = async (req, res) => {
+  try {
+    const registro = await PsychologicalTaskCognitiveTest.findAll({
+      where: {
+        psychological_task_id: 6,
+      },
+      include: [
+        {
+          model: CognitiveTest,
+          as: "psychological_task_cognitive_test-c",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
+    const tests = [];
+    for (const test of registro) {
+      tests.push(test["psychological_task_cognitive_test-c"].name);
+    }
+    const mensaje = tests.join(", ");
+    res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: error.message });
