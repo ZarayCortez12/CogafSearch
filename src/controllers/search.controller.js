@@ -346,3 +346,36 @@ export const searchFifteen = async (req, res) => {
   }
 };
 
+
+export const searchSixteen = async (req, res) => {
+  try {
+    const registro = await PsychologicalTaskCognitiveTest.findAll({
+      where: {
+        psychological_task_id: 16,
+      },
+      include: [
+        {
+          model: CognitiveTest,
+          as: "psychological_task_cognitive_test-c",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
+    const tests = [];
+    for (const test of registro) {
+      tests.push(test["psychological_task_cognitive_test-c"].name);
+    }
+    const mensaje = tests.join(", ");
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
