@@ -409,3 +409,32 @@ export const searchEighteen = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const searchNineteen = async (req, res) => {};
+
+export const searchTewenty = async (req, res) => {
+  try {
+    const registro = await Behaviour.findOne({
+      where: {
+        id: 4,
+      },
+      include: [
+        {
+          model: Characteristic,
+          as: "behaviour_characteristic",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    const mensaje = registro["behaviour_characteristic"].name;
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
