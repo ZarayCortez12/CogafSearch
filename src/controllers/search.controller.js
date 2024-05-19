@@ -6,13 +6,15 @@ import SecondaryEmotionType from "../models/secondary_emotion_type.js";
 import Emotion from "../models/emotion.js";
 import EmotionCharacterist from "../models/emotions_characteristic.js";
 import Characteristic from "../models/characteristic.js";
-import BasicCognitiveFuntionType from "../models/basic_cognitive_fuction_type.js";
-import BasicCognitiveFuntion from "../models/basic_cognitive_fuction.js";
 import Complementary_activity_cognitive_function from "../models/complementary_activity_cognitive_function.js";
 import { where } from "sequelize";
 import Sequelize from "sequelize";
 import Cognitive_function from "../models/cognitive_function.js";
 import Complementary_activity from "../models/complementary_activity.js";
+import Basic_cognitive_function from "../models/basic_cognitive_function.js";
+import Basic_cognitive_function_type from "../models/basic_cognitive_function_type.js";
+import Complex_cognitive_function from "../models/complex_cognitive_function.js";
+import Complex_cognitive_function_type from "../models/complex_cognitive_function_type.js";
 import Mechanic from "../models/mechanic.js";
 import Mechanic_complementary_activity from "../models/mechanic_complementary_activity.js";
 import Behaviour from "../models/behaviour.js";
@@ -410,7 +412,65 @@ export const searchEighteen = async (req, res) => {
   }
 };
 
-export const searchNineteen = async (req, res) => {};
+export const searchNineteen = async (req, res) => {
+  try {
+    const registro = await Complementary_activity_cognitive_function.findAll({
+      where: {
+        complementary_activity_id: 9,
+      },
+      include: [
+        {
+          model: Cognitive_function,
+          as: "complementary_activity_cognitive_function-cognitive_function",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    const ids = [];
+    for (const id of registro) {
+      ids.push(
+        id["complementary_activity_cognitive_function-cognitive_function"].id
+      );
+    }
+
+    const basic = await Basic_cognitive_function.findOne({
+      where: { id: ids[0] },
+      include: [
+        {
+          model: Basic_cognitive_function_type,
+          as: "b-cognitive-function_b-cognitive-function-type",
+        },
+      ],
+    });
+    const complex = await Complex_cognitive_function.findOne({
+      where: { id: ids[1] },
+      include: [
+        {
+          model: Complex_cognitive_function_type,
+          as: "complex_cognitive_function-Complex_cognitive_function_type",
+        },
+      ],
+    });
+
+    if (!basic || !complex) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+
+    const mensaje = `${basic["b-cognitive-function_b-cognitive-function-type"].description}, ${complex["complex_cognitive_function-Complex_cognitive_function_type"].description}`;
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const searchTewenty = async (req, res) => {
   try {

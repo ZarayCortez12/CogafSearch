@@ -23,7 +23,7 @@ router.get("/15", searchFifteen);
 router.get("/16", searchSixteen);
 //router.get("/17", searchSeventeen);
 router.get("/18", searchEighteen);
-//router.get("/19", searchNineteen);
+router.get("/19", searchNineteen);
 router.get("/20", searchTewenty);
 
 export default router;
