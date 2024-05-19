@@ -18,16 +18,8 @@ import Complex_cognitive_function_type from "../models/complex_cognitive_functio
 import Mechanic from "../models/mechanic.js";
 import Mechanic_complementary_activity from "../models/mechanic_complementary_activity.js";
 import Behaviour from "../models/behaviour.js";
-<<<<<<< HEAD
 import Capability from "../models/capability.js";
 import Capability_cognitive_function from "../models/capability_cognitive_function.js";
-import Complex_cognitive_function_type from "../models/complex_cognitive_function_type.js";
-import Complex_cognitive_function from "../models/complex_cognitive_function.js";
-
-export const searchOne = async (req, res) => {
-  try {
-    
-=======
 import PsychologicalTask from "../models/psychological_task.js";
 import CognitiveTest from "../models/cognitive_test.js";
 import Application_type from "../models/application_type.js";
@@ -36,7 +28,6 @@ import PsychologicalTaskCognitiveTest from "../models/psychological_task_cogniti
 export const searchOne = async (req, res) => {
   try {
     // Buscar la característica con el nombre "Promotion of equity"
->>>>>>> 854757b15923fd5aaba4ea5675c564f8b45a3785
     const caracteristica = await Characteristic.findOne({
       where: { name: "Promotion of equity" },
     });
@@ -47,15 +38,6 @@ export const searchOne = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    
-    const caracteristicaId = caracteristica.id;
-
-    
-    const comportamientos = await Behaviour.findAll({
-      where: { characteristic_id: caracteristicaId },
-      attributes: ["description"],
-=======
     // Obtener el ID de la característica encontrada
     const caracteristicaId = caracteristica.id;
 
@@ -63,7 +45,6 @@ export const searchOne = async (req, res) => {
     const comportamientos = await Behaviour.findAll({
       where: { characteristic_id: caracteristicaId },
       attributes: ["description"], // Seleccionar solo la descripción del comportamiento
->>>>>>> 854757b15923fd5aaba4ea5675c564f8b45a3785
     });
 
     if (!comportamientos || comportamientos.length === 0) {
@@ -73,17 +54,10 @@ export const searchOne = async (req, res) => {
       });
     }
 
-<<<<<<< HEAD
-    
-    let mensaje = "Behaviors associated with promoting equity include";
-
-    
-=======
     // Construir el mensaje con las descripciones de los comportamientos
     let mensaje = "Behaviors associated with promoting equity include";
 
     // Iterar sobre los comportamientos y agregar sus descripciones al mensaje
->>>>>>> 854757b15923fd5aaba4ea5675c564f8b45a3785
     comportamientos.forEach((comportamiento, index) => {
       if (index === 0) {
         mensaje += ` ${comportamiento.description}`;
@@ -96,11 +70,7 @@ export const searchOne = async (req, res) => {
 
     mensaje += ".";
 
-<<<<<<< HEAD
-    
-=======
     // Enviar el mensaje como respuesta
->>>>>>> 854757b15923fd5aaba4ea5675c564f8b45a3785
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
