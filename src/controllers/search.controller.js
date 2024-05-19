@@ -347,10 +347,7 @@ export const searchFifteen = async (req, res) => {
   }
 };
 
-
-export const searchSixteen = async (req, res) => {
-  
-};
+export const searchSixteen = async (req, res) => {};
 
 export const searchSeventeen = async (req, res) => {
   try {
@@ -373,7 +370,7 @@ export const searchSeventeen = async (req, res) => {
     }
 
     const mensaje = registro["congnitive-test_application-type"].description;
-    
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -381,3 +378,34 @@ export const searchSeventeen = async (req, res) => {
   }
 };
 
+export const searchEighteen = async (req, res) => {
+  try {
+    const registro = await Mechanic_complementary_activity.findAll({
+      where: {
+        complementary_activity_id: 3,
+      },
+      include: [
+        {
+          model: Mechanic,
+          as: "mechanic_complementary_activity-m",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+
+    const mechanics = [];
+    for (const mechanic of registro) {
+      mechanics.push(mechanic["mechanic_complementary_activity-m"].name);
+    }
+    const mensaje = mechanics.join(", ");
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

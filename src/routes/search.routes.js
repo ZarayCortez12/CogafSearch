@@ -6,7 +6,8 @@ import {
   searchFourteen,
   searchFifteen,
   searchSixteen,
-  searchSeventeen
+  searchSeventeen,
+  searchEighteen,
 } from "../controllers/search.controller.js";
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.get("/14", searchFourteen);
 router.get("/15", searchFifteen);
 router.get("/16", searchSixteen);
 router.get("/17", searchSeventeen);
+router.get("/18", searchEighteen);
 
 export default router;
