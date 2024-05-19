@@ -10,5 +10,8 @@ const Capability = sequelize.define("capability", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+}, {
+  tableName: 'capability', // Especificar el nombre de la tabla aquí
+  timestamps: false
 });
 export default Capability;
