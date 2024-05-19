@@ -6,13 +6,15 @@ import SecondaryEmotionType from "../models/secondary_emotion_type.js";
 import Emotion from "../models/emotion.js";
 import EmotionCharacterist from "../models/emotions_characteristic.js";
 import Characteristic from "../models/characteristic.js";
-import BasicCognitiveFuntionType from "../models/basic_cognitive_fuction_type.js";
-import BasicCognitiveFuntion from "../models/basic_cognitive_fuction.js";
 import Complementary_activity_cognitive_function from "../models/complementary_activity_cognitive_function.js";
 import { where } from "sequelize";
 import Sequelize from "sequelize";
 import Cognitive_function from "../models/cognitive_function.js";
 import Complementary_activity from "../models/complementary_activity.js";
+import Basic_cognitive_function from "../models/basic_cognitive_function.js";
+import Basic_cognitive_function_type from "../models/basic_cognitive_function_type.js";
+import Complex_cognitive_function from "../models/complex_cognitive_function.js";
+import Complex_cognitive_function_type from "../models/complex_cognitive_function_type.js";
 import Mechanic from "../models/mechanic.js";
 import Mechanic_complementary_activity from "../models/mechanic_complementary_activity.js";
 import Behaviour from "../models/behaviour.js";
@@ -28,6 +30,7 @@ export const searchOne = async (req, res) => {
 =======
 import PsychologicalTask from "../models/psychological_task.js";
 import CognitiveTest from "../models/cognitive_test.js";
+import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 
 export const searchOne = async (req, res) => {
@@ -468,17 +471,18 @@ export const searchFifteen = async (req, res) => {
   }
 };
 
+export const searchSixteen = async (req, res) => {};
 
-export const searchSixteen = async (req, res) => {
+export const searchSeventeen = async (req, res) => {
   try {
-    const registro = await PsychologicalTaskCognitiveTest.findAll({
+    const registro = await CognitiveTest.findOne({
       where: {
-        psychological_task_id: 16,
+        id: 3,
       },
       include: [
         {
-          model: CognitiveTest,
-          as: "psychological_task_cognitive_test-c",
+          model: Application_type,
+          as: "congnitive-test_application-type",
         },
       ],
     });
@@ -488,12 +492,9 @@ export const searchSixteen = async (req, res) => {
         message: "No se encontraron registros con los IDs dados.",
       });
     }
-    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
-    const tests = [];
-    for (const test of registro) {
-      tests.push(test["psychological_task_cognitive_test-c"].name);
-    }
-    const mensaje = tests.join(", ");
+
+    const mensaje = registro["congnitive-test_application-type"].description;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -501,3 +502,121 @@ export const searchSixteen = async (req, res) => {
   }
 };
 
+export const searchEighteen = async (req, res) => {
+  try {
+    const registro = await Mechanic_complementary_activity.findAll({
+      where: {
+        complementary_activity_id: 3,
+      },
+      include: [
+        {
+          model: Mechanic,
+          as: "mechanic_complementary_activity-m",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+
+    const mechanics = [];
+    for (const mechanic of registro) {
+      mechanics.push(mechanic["mechanic_complementary_activity-m"].name);
+    }
+    const mensaje = mechanics.join(", ");
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchNineteen = async (req, res) => {
+  try {
+    const registro = await Complementary_activity_cognitive_function.findAll({
+      where: {
+        complementary_activity_id: 9,
+      },
+      include: [
+        {
+          model: Cognitive_function,
+          as: "complementary_activity_cognitive_function-cognitive_function",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    const ids = [];
+    for (const id of registro) {
+      ids.push(
+        id["complementary_activity_cognitive_function-cognitive_function"].id
+      );
+    }
+
+    const basic = await Basic_cognitive_function.findOne({
+      where: { id: ids[0] },
+      include: [
+        {
+          model: Basic_cognitive_function_type,
+          as: "b-cognitive-function_b-cognitive-function-type",
+        },
+      ],
+    });
+    const complex = await Complex_cognitive_function.findOne({
+      where: { id: ids[1] },
+      include: [
+        {
+          model: Complex_cognitive_function_type,
+          as: "complex_cognitive_function-Complex_cognitive_function_type",
+        },
+      ],
+    });
+
+    if (!basic || !complex) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+
+    const mensaje = `${basic["b-cognitive-function_b-cognitive-function-type"].description}, ${complex["complex_cognitive_function-Complex_cognitive_function_type"].description}`;
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchTewenty = async (req, res) => {
+  try {
+    const registro = await Behaviour.findOne({
+      where: {
+        id: 4,
+      },
+      include: [
+        {
+          model: Characteristic,
+          as: "behaviour_characteristic",
+        },
+      ],
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    const mensaje = registro["behaviour_characteristic"].name;
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
