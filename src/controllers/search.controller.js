@@ -24,6 +24,7 @@ import CognitiveTest from "../models/cognitive_test.js";
 import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 import Cognitive_test from "../models/cognitive_test.js";
+import State from "../models/state.js";
 
 export const searchOne = async (req, res) => {
   try {
@@ -157,64 +158,145 @@ export const searchTwo = async (req, res) => {
 
 export const searchThree = async (req, res) => {
   try {
-      // Buscar el test "Wisconsin Card Sorting Test" por su ID
-      const testId = 33;
-      const test = await Cognitive_test.findOne({
-          where: { id: testId },
-          include: [
-              {
-                  model: Application_type,
-                  as: "congnitive-test_application-type",
-                  attributes: ["description"],
-              },
-          ],
+    // Buscar el test "Wisconsin Card Sorting Test" por su ID
+    const testId = 33;
+    const test = await Cognitive_test.findOne({
+      where: { id: testId },
+      include: [
+        {
+          model: Application_type,
+          as: "congnitive-test_application-type",
+          attributes: ["description"],
+        },
+      ],
+    });
+
+    if (!test) {
+      return res.status(404).json({
+        message: "No se encontró ningún test cognitivo con el ID dado.",
       });
+    }
 
-      if (!test) {
-          return res.status(404).json({
-              message: "No se encontró ningún test cognitivo con el ID dado.",
-          });
-      }
+    // Obtener la descripción del test
+    const testDescription = test.description;
 
-      // Obtener la descripción del test
-      const testDescription = test.description;
+    // Buscar las tareas psicológicas relacionadas con el test
+    const relaciones = await PsychologicalTaskCognitiveTest.findAll({
+      where: { cognitive_test_id: testId },
+      include: [
+        {
+          model: PsychologicalTask,
+          as: "psychological_task_cognitive_test-t",
+        },
+      ],
+    });
 
-      // Buscar las tareas psicológicas relacionadas con el test
-      const relaciones = await PsychologicalTaskCognitiveTest.findAll({
-          where: { cognitive_test_id: testId },
-          include: [
-              {
-                  model: PsychologicalTask,
-                  as: "psychological_task_cognitive_test-t",
-              },
-          ],
+    if (!relaciones || relaciones.length === 0) {
+      return res.status(404).json({
+        message: "No se encontraron tareas psicológicas asociadas con el test.",
       });
+    }
 
-      if (!relaciones || relaciones.length === 0) {
-          return res.status(404).json({
-              message: "No se encontraron tareas psicológicas asociadas con el test.",
-          });
-      }
+    // Obtener los nombres de las tareas psicológicas
+    const tareas = relaciones.map(
+      (relacion) => relacion["psychological_task_cognitive_test-t"].name
+    );
 
-      // Obtener los nombres de las tareas psicológicas
-      const tareas = relaciones.map(relacion => relacion["psychological_task_cognitive_test-t"].name);
+    // Construir el mensaje con la descripción del test y las tareas psicológicas
+    let mensaje = `The Wisconsin Card Sorting Test ${testDescription} and It applies the following tasks: `;
+    if (tareas.length > 1) {
+      mensaje += tareas.slice(0, -1).join(", ");
+      mensaje += ` and ${tareas.slice(-1)[0]}`;
+    } else {
+      mensaje += tareas[0];
+    }
 
-      // Construir el mensaje con la descripción del test y las tareas psicológicas
-      let mensaje = `The Wisconsin Card Sorting Test ${testDescription} and It applies the following tasks: `;
-      if (tareas.length > 1) {
-          mensaje += tareas.slice(0, -1).join(", ");
-          mensaje += ` and ${tareas.slice(-1)[0]}`;
-      } else {
-          mensaje += tareas[0];
-      }
+    mensaje += ".";
 
-      mensaje += ".";
-
-      // Enviar el mensaje como respuesta
-      res.status(200).json({ mensaje });
+    // Enviar el mensaje como respuesta
+    res.status(200).json({ mensaje });
   } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ message: error.message });
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchFour = async (req, res) => {
+  try {
+    const positiveStates = await State.findAll({
+      where: { valence: { [Sequelize.Op.gt]: 0 } },
+    });
+
+    if (!positiveStates.length) {
+      return res
+        .status(404)
+        .json({ message: "No positive valence states found." });
+    }
+
+    const positiveStateIds = positiveStates.map((state) => state.id);
+
+    const emotions = await Emotion.findAll({
+      where: { state_id: positiveStateIds },
+    });
+
+    if (!emotions.length) {
+      return res
+        .status(404)
+        .json({ message: "No emotions found for positive valence states." });
+    }
+
+    const emotionIds = emotions.map((emotion) => emotion.id);
+
+    const basicEmotions = await BasicEmotion.findAll({
+      where: { id: emotionIds },
+      include: [
+        {
+          model: BasicEmotionType,
+          as: "b-emotion_b-emotion-type",
+          attributes: ["description"],
+        },
+      ],
+    });
+
+    const secondaryEmotions = await SecondaryEmotion.findAll({
+      where: { id: emotionIds },
+      include: [
+        {
+          model: SecondaryEmotionType,
+          as: "s-emotion_s-emotion-type",
+          attributes: ["description"],
+        },
+      ],
+    });
+
+    const emotionDescriptions = [
+      ...basicEmotions.map((be) => be["b-emotion_b-emotion-type"].description),
+      ...secondaryEmotions.map(
+        (se) => se["s-emotion_s-emotion-type"].description
+      ),
+    ];
+
+    if (!emotionDescriptions.length) {
+      return res
+        .status(404)
+        .json({ message: "No positive valence emotion descriptions found." });
+    }
+
+    let responseMessage =
+      "The emotions perceived as positive in terms of valence are ";
+    responseMessage += emotionDescriptions.slice(0, -1).join(", ");
+    if (emotionDescriptions.length > 1) {
+      responseMessage +=
+        " and " + emotionDescriptions[emotionDescriptions.length - 1];
+    } else {
+      responseMessage += emotionDescriptions[0];
+    }
+    responseMessage += ".";
+
+    res.status(200).json({ message: responseMessage });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
   }
 };
 
