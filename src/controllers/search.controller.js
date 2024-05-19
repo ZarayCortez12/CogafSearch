@@ -25,6 +25,23 @@ import CognitiveTest from "../models/cognitive_test.js";
 import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 
+import Question from "../models/question.js";
+
+export const question = async (req, res) => {
+  try {
+    const question = await Question.findAll();
+    if (!question) {
+      return res.status(404).json({
+        message: "No se encontraron registros con los IDs dados.",
+      });
+    }
+    res.status(200).json({ question });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const searchOne = async (req, res) => {
   try {
     // Buscar la característica con el nombre "Promotion of equity"

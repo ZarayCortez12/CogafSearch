@@ -10,11 +10,13 @@ import {
   searchEighteen,
   searchNineteen,
   searchTewenty,
+  question
 } from "../controllers/search.controller.js";
 
 const router = express.Router();
 
 // Peticiones GET
+router.get("/", question);
 router.get("/11", searchEleven); 
 router.get("/12", searchTwelve);
 router.get("/13", searchThirteen);
