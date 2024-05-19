@@ -2,7 +2,6 @@ import BasicEmotionType from "../models/basic_emotion_type.js";
 import BasicEmotion from "../models/basic_emotion.js";
 import SecondaryEmotion from "../models/secondary_emotion.js";
 import SecondaryEmotionType from "../models/secondary_emotion_type.js";
-
 import Emotion from "../models/emotion.js";
 import EmotionCharacterist from "../models/emotions_characteristic.js";
 import Characteristic from "../models/characteristic.js";
@@ -24,6 +23,7 @@ import PsychologicalTask from "../models/psychological_task.js";
 import CognitiveTest from "../models/cognitive_test.js";
 import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
+import Cognitive_test from "../models/cognitive_test.js";
 
 export const searchOne = async (req, res) => {
   try {
@@ -80,93 +80,143 @@ export const searchOne = async (req, res) => {
 
 export const searchTwo = async (req, res) => {
   try {
-      
-      const habilidad = await Capability.findOne({
-          where: { name: "Ability to communicate effectively" },
+    const habilidad = await Capability.findOne({
+      where: { name: "Ability to communicate effectively" },
+    });
+
+    if (!habilidad) {
+      return res.status(404).json({
+        message: "No se encontró ninguna habilidad con el nombre dado.",
+      });
+    }
+
+    const habilidadId = habilidad.id;
+
+    const relaciones = await Capability_cognitive_function.findAll({
+      where: { capability_id: habilidadId },
+    });
+
+    if (!relaciones || relaciones.length === 0) {
+      return res.status(404).json({
+        message:
+          "No se encontraron funciones cognitivas asociadas con la habilidad para comunicarse efectivamente.",
+      });
+    }
+
+    const idsFuncionesCognitivas = relaciones.map(
+      (relacion) => relacion.cognitive_function_id
+    );
+
+    const nombresFuncionesCognitivas = [];
+    for (const idFuncion of idsFuncionesCognitivas) {
+      let funcion = await Complex_cognitive_function.findOne({
+        where: { id: idFuncion },
       });
 
-      if (!habilidad) {
+      if (!funcion) {
+        funcion = await Basic_cognitive_function.findOne({
+          where: { id: idFuncion },
+        });
+      }
+
+      if (funcion) {
+        let nombreFuncion;
+        if (funcion instanceof Complex_cognitive_function) {
+          const tipoFuncion = await Complex_cognitive_function_type.findOne({
+            where: { id: funcion.complex_cognitive_function_type_id },
+          });
+          nombreFuncion = tipoFuncion ? tipoFuncion.description : "";
+        } else if (funcion instanceof Basic_cognitive_function) {
+          const tipoFuncion = await Basic_cognitive_function_type.findOne({
+            where: { id: funcion.basic_cognitive_function_type_id },
+          });
+          nombreFuncion = tipoFuncion ? tipoFuncion.description : "";
+        }
+
+        if (nombreFuncion) {
+          nombresFuncionesCognitivas.push(nombreFuncion);
+        }
+      }
+    }
+
+    let mensaje =
+      "The cognitive functions that are present in the ability to communicate effectively are ";
+    if (nombresFuncionesCognitivas.length > 1) {
+      mensaje += nombresFuncionesCognitivas.slice(0, -1).join(", ");
+      mensaje += ` and ${nombresFuncionesCognitivas.slice(-1)[0]}`;
+    } else {
+      mensaje += nombresFuncionesCognitivas[0];
+    }
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchThree = async (req, res) => {
+  try {
+      // Buscar el test "Wisconsin Card Sorting Test" por su ID
+      const testId = 33;
+      const test = await Cognitive_test.findOne({
+          where: { id: testId },
+          include: [
+              {
+                  model: Application_type,
+                  as: "congnitive-test_application-type",
+                  attributes: ["description"],
+              },
+          ],
+      });
+
+      if (!test) {
           return res.status(404).json({
-              message: "No se encontró ninguna habilidad con el nombre dado.",
+              message: "No se encontró ningún test cognitivo con el ID dado.",
           });
       }
 
-     
-      const habilidadId = habilidad.id;
+      // Obtener la descripción del test
+      const testDescription = test.description;
 
-      
-      const relaciones = await Capability_cognitive_function.findAll({
-          where: { capability_id: habilidadId },
+      // Buscar las tareas psicológicas relacionadas con el test
+      const relaciones = await PsychologicalTaskCognitiveTest.findAll({
+          where: { cognitive_test_id: testId },
+          include: [
+              {
+                  model: PsychologicalTask,
+                  as: "psychological_task_cognitive_test-t",
+              },
+          ],
       });
 
       if (!relaciones || relaciones.length === 0) {
           return res.status(404).json({
-              message: "No se encontraron funciones cognitivas asociadas con la habilidad para comunicarse efectivamente.",
+              message: "No se encontraron tareas psicológicas asociadas con el test.",
           });
       }
 
-      
-      const idsFuncionesCognitivas = relaciones.map(relacion => relacion.cognitive_function_id);
+      // Obtener los nombres de las tareas psicológicas
+      const tareas = relaciones.map(relacion => relacion["psychological_task_cognitive_test-t"].name);
 
-      
-      const nombresFuncionesCognitivas = [];
-      for (const idFuncion of idsFuncionesCognitivas) {
-          
-          let funcion = await Complex_cognitive_function.findOne({
-              where: { id: idFuncion },
-          });
-
-         
-          if (!funcion) {
-              funcion = await BasicCognitiveFuntion.findOne({
-                  where: { id: idFuncion },
-              });
-          }
-
-          
-          if (funcion) {
-              
-              let nombreFuncion;
-              if (funcion instanceof Complex_cognitive_function) {
-                  
-                  const tipoFuncion = await Complex_cognitive_function_type.findOne({
-                      where: { id: funcion.complex_cognitive_function_type_id },
-                  });
-                  nombreFuncion = tipoFuncion ? tipoFuncion.description : "";
-              } else if (funcion instanceof BasicCognitiveFuntion) {
-                 
-                  const tipoFuncion = await BasicCognitiveFuntionType.findOne({
-                      where: { id: funcion.basic_cognitive_function_type_id },
-                  });
-                  nombreFuncion = tipoFuncion ? tipoFuncion.description : "";
-              }
-
-              
-              if (nombreFuncion) {
-                  nombresFuncionesCognitivas.push(nombreFuncion);
-              }
-          }
-      }
-
-      
-      let mensaje = "The cognitive functions that are present in the ability to communicate effectively are ";
-      if (nombresFuncionesCognitivas.length > 1) {
-          mensaje += nombresFuncionesCognitivas.slice(0, -1).join(", ");
-          mensaje += ` and ${nombresFuncionesCognitivas.slice(-1)[0]}`;
+      // Construir el mensaje con la descripción del test y las tareas psicológicas
+      let mensaje = `The Wisconsin Card Sorting Test ${testDescription} and It applies the following tasks: `;
+      if (tareas.length > 1) {
+          mensaje += tareas.slice(0, -1).join(", ");
+          mensaje += ` and ${tareas.slice(-1)[0]}`;
       } else {
-          mensaje += nombresFuncionesCognitivas[0];
+          mensaje += tareas[0];
       }
 
-      
+      mensaje += ".";
+
+      // Enviar el mensaje como respuesta
       res.status(200).json({ mensaje });
   } catch (error) {
       console.error("Error:", error);
       res.status(500).json({ message: error.message });
   }
 };
-
-
-
 
 export const searchNine = async (req, res) => {
   try {
@@ -224,7 +274,7 @@ export const searchNine = async (req, res) => {
 
 export const searchTen = async (req, res) => {
   try {
-    const registro = await BasicCognitiveFuntionType.findOne({
+    const registro = await Basic_cognitive_function_type.findOne({
       where: { description: "Attention" },
     });
 
@@ -234,7 +284,9 @@ export const searchTen = async (req, res) => {
       });
     }
 
-    const registroAux = await BasicCognitiveFuntion.findByPk(registro.id);
+    const registroAux = await Basic_cognitive_function_type.findByPk(
+      registro.id
+    );
     const cognitive_funtion = await Cognitive_function.findOne({
       where: { id: registroAux.id },
     });
