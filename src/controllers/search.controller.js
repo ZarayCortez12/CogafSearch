@@ -18,6 +18,7 @@ import Mechanic_complementary_activity from "../models/mechanic_complementary_ac
 import Behaviour from "../models/behaviour.js";
 import PsychologicalTask from "../models/psychological_task.js";
 import CognitiveTest from "../models/cognitive_test.js";
+import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 
 export const searchOne = async (req, res) => {
@@ -348,15 +349,19 @@ export const searchFifteen = async (req, res) => {
 
 
 export const searchSixteen = async (req, res) => {
+  
+};
+
+export const searchSeventeen = async (req, res) => {
   try {
-    const registro = await PsychologicalTaskCognitiveTest.findAll({
+    const registro = await CognitiveTest.findOne({
       where: {
-        psychological_task_id: 16,
+        id: 3,
       },
       include: [
         {
-          model: CognitiveTest,
-          as: "psychological_task_cognitive_test-c",
+          model: Application_type,
+          as: "congnitive-test_application-type",
         },
       ],
     });
@@ -366,12 +371,9 @@ export const searchSixteen = async (req, res) => {
         message: "No se encontraron registros con los IDs dados.",
       });
     }
-    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
-    const tests = [];
-    for (const test of registro) {
-      tests.push(test["psychological_task_cognitive_test-c"].name);
-    }
-    const mensaje = tests.join(", ");
+
+    const mensaje = registro["congnitive-test_application-type"].description;
+    
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);

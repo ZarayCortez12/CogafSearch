@@ -10,5 +10,8 @@ const Application_type = sequelize.define("application_type", {
     type: Sequelize.STRING,
     allowNull: true,
   },
+}, {
+  tableName: 'application_type', // Especificar el nombre de la tabla aquí
+  timestamps: false
 });
 export default Application_type;
