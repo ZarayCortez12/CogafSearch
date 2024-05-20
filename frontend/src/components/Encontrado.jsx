@@ -12,7 +12,7 @@ function Encontrado({ backgroundColor, mensaje}) {
       </div>
 
       <div className="rounded border-dashed border-4 border-green-300 p-10 w-1/2 h-auto mb-5">
-        <h1 className={`text-3xl text-center mb-10 font-serif font-bold ${textColor}`} style={{ textShadow: '0px 2px 4px #98FFD9' }}>Resultado Encontrado</h1>
+        <h1 className={`text-3xl text-center mb-10 font-serif font-bold ${textColor}`} style={{ textShadow: '0px 2px 4px #98FFD9' }}>Result Found</h1>
 
         <h2 className={`text-2xl text-center mb-10 font-serif ${textColor}`}>
           {mensaje}
