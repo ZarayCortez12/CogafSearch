@@ -26,6 +26,8 @@ const methodMap = {
   3: searchController.searchThree,
   4: searchController.searchFour,
   5: searchController.searchFive,
+  7: searchController.searchSeven,
+  8: searchController.searchEigth,
   9: searchController.searchNine,
   10: searchController.searchTen,
   11: searchController.searchEleven,

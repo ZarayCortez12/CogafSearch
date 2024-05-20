@@ -15,8 +15,10 @@ const Parameter = sequelize.define(
     characteristic_id: {
       type: Sequelize.INTEGER,
     },
-  },
-);
+  }, {
+    tableName: 'parameter', // Especificar el nombre de la tabla aquí
+    timestamps: false
+  });
 
 Parameter.belongsTo(Characteristic, {
   foreignKey: "characteristic_id",

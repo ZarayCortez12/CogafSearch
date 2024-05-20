@@ -25,6 +25,7 @@ import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
 import Cognitive_test from "../models/cognitive_test.js";
 import State from "../models/state.js";
+import Parameter from "../models/parameter.js";
 
 export const searchOne = async (req, res) => {
   try {
@@ -367,6 +368,118 @@ export const searchFive = async (req, res) => {
   }
 };
 
+export const searchSeven = async (req, res) => {
+  try {
+    // Definir el ID de la característica "Sentir que se tiene control de todo"
+    const characteristicId = 5;
+
+    // Buscar los parámetros asociados con la característica
+    const parametros = await Parameter.findAll({
+      where: { characteristic_id: characteristicId },
+      include: [
+        {
+          model: Characteristic,
+          as: "parameter-characteristic",
+          attributes: ["name"],
+        },
+      ],
+    });
+
+    if (parametros.length === 0) {
+      return res.status(404).json({
+        message: "No se encontraron parámetros para la característica dada.",
+      });
+    }
+
+    // Construir el mensaje con los parámetros y sus valores
+    const parametrosFormatted = parametros.map(
+      (parametro) =>
+        `${parametro["parameter-characteristic"].name}: ${parametro.value}`
+    );
+
+    let mensaje;
+    if (parametrosFormatted.length > 1) {
+      const lastParameter = parametrosFormatted.pop();
+      const joinedParameters = parametrosFormatted.join(", ");
+      mensaje = `The parameters under which the feeling that one has control over everything is evaluated are ${joinedParameters}, and ${lastParameter}`;
+    } else {
+      mensaje = `The parameters under which the feeling that one has control over everything is evaluated are ${parametrosFormatted[0]}`;
+    }
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchEigth = async (req, res) => {
+  try {
+    const registro = await BasicEmotionType.findOne({
+      where: { description: "Happiness" },
+    });
+
+    if (!registro) {
+      return res.status(404).json({
+        message: "No se encontró ningún registro con la descripción dada.",
+      });
+    }
+
+    const registroAux = await BasicEmotion.findOne({
+      where: { basic_emotion_type_id: registro.id },
+    });
+
+    if (!registroAux) {
+      return res.status(404).json({
+        message:
+          "No se encontró ningún registro en BasicEmotion con el ID dado.",
+      });
+    }
+
+    const emotion = await Emotion.findOne({ where: { id: registroAux.id } });
+
+    if (!emotion) {
+      return res
+        .status(404)
+        .json({ message: "No se encontró ninguna emoción con el ID dado." });
+    }
+
+    const caracteristicas = await EmotionCharacterist.findAll({
+      where: { emotion_id: emotion.id },
+      include: [
+        {
+          model: Characteristic,
+          as: "emotion_characteristic-c",
+        },
+      ],
+    });
+
+    if (caracteristicas.length === 0) {
+      return res.status(404).json({
+        message: "No se encontraron características para esta emoción.",
+      });
+    }
+
+    const nombresCaracteristicas = caracteristicas.map(
+      (c) => c["emotion_characteristic-c"].name
+    );
+
+    let mensaje;
+    if (nombresCaracteristicas.length > 1) {
+      const lastCharacteristic = nombresCaracteristicas.pop();
+      const joinedCharacteristics = nombresCaracteristicas.join(", ");
+      mensaje = `The emotion of Happiness has these following characteristics ${joinedCharacteristics} and ${lastCharacteristic}`;
+    } else {
+      mensaje = `The emotion of Happiness has these following characteristics ${nombresCaracteristicas[0]}`;
+    }
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const searchNine = async (req, res) => {
   try {
     const registro = await BasicEmotionType.findOne({
@@ -378,7 +491,10 @@ export const searchNine = async (req, res) => {
         message: "No se encontró ningún registro con la descripción dada.",
       });
     }
-    const registroAux = await BasicEmotion.findByPk(registro.id);
+    const registroAux = await BasicEmotion.findOne({
+      where: { basic_emotion_type_id: registro.id },
+    });
+
     if (!registroAux) {
       return res.status(404).json({
         message:
