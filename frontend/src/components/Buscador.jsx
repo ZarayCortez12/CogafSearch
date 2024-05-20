@@ -10,6 +10,8 @@ function Buscador() {
   const [inputValue, setInputValue] = useState("");
   const [serverResponse, setServerResponse] = useState("");
   const [error, setError] = useState("");
+  const [backgroundColor, setBackgroundColor] = useState("bg-while");
+  const [questions, setQuestions] = useState([]); // Cambiado a array para manejar múltiples preguntas
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -19,12 +21,13 @@ function Buscador() {
     setInputValue("");
   };
 
-  const handleSearch = async () => {
-    if (inputValue.trim()) {
+  const handleSearch = async (query) => {
+    const question = query || inputValue;
+    if (question.trim()) {
       try {
         const response = await axios.post(
           "http://localhost:4000/defineQuestion",
-          { question: inputValue }
+          { question }
         );
         setServerResponse(response.data);
         setError("");
@@ -35,7 +38,23 @@ function Buscador() {
       }
     }
   };
-  const [backgroundColor, setBackgroundColor] = useState("bg-while");
+
+  const handleSearchQuestions = async () => {
+    const searchQuery = inputValue.trim();
+    if (searchQuery) {
+      try {
+        const response = await axios.post(
+          'http://localhost:4000/search',
+          { query: searchQuery}
+        );
+        setQuestions(response.data);
+      } catch (error) {
+        console.error('Error al realizar la solicitud:', error);
+      }
+    }
+};
+
+
 
   const handleBackgroundChange = () => {
     setBackgroundColor(
@@ -43,19 +62,24 @@ function Buscador() {
     );
   };
 
+  const handleQuestionClick = (question) => {
+    setInputValue(question);
+    handleSearch(question);
+    handleSearchQuestions();
+};
   return (
     <>
       <NavBar onBackgroundChange={handleBackgroundChange} />
 
       <div className="bg-green-300 flex flex-col items-center justify-center p-20">
         <h1 className="text-3xl mb-10 font-serif font-bold">
-          ¿Qué quieres consultar hoy?
+          What do you want to consult today?
         </h1>
 
         <div className="flex items-center border rounded-full p-2 mt-4 bg-white shadow-lg w-9/12 relative">
           <input
             type="text"
-            placeholder="Escribe aquí tu pregunta..."
+            placeholder="Write your question here..."
             className="flex-grow outline-none pl-6 w-full"
             value={inputValue}
             onChange={handleChange}
@@ -68,7 +92,7 @@ function Buscador() {
           )}
           <IoSearchCircleSharp
             className="text-green-300 text-3xl ml-2 cursor-pointer"
-            onClick={handleSearch}
+            onClick={() => handleSearch()}
           />
         </div>
       </div>
@@ -80,10 +104,18 @@ function Buscador() {
           backgroundColor={backgroundColor}
           mensaje={serverResponse.mensaje}
         />
+        
       )}
 
+{questions.map((question, index) => (
+  <div key={index}>
+    <h1>{question.description}</h1>
+  </div>
+))}
+
+
       {!error && !serverResponse && (
-        <Preguntas backgroundColor={backgroundColor} />
+        <Preguntas backgroundColor={backgroundColor} onQuestionClick={handleQuestionClick} />
       )}
     </>
   );
