@@ -23,10 +23,8 @@ import PsychologicalTask from "../models/psychological_task.js";
 import CognitiveTest from "../models/cognitive_test.js";
 import Application_type from "../models/application_type.js";
 import PsychologicalTaskCognitiveTest from "../models/psychological_task_cognitive_test.js";
-import Cognitive_test from "../models/cognitive_test.js";
 import State from "../models/state.js";
 import Parameter from "../models/parameter.js";
-
 import Question from "../models/question.js";
 
 export const question = async (req, res) => {
@@ -46,7 +44,6 @@ export const question = async (req, res) => {
 
 export const searchOne = async (req, res) => {
   try {
-    // Buscar la característica con el nombre "Promotion of equity"
     const caracteristica = await Characteristic.findOne({
       where: { name: "Promotion of equity" },
     });
@@ -57,13 +54,11 @@ export const searchOne = async (req, res) => {
       });
     }
 
-    // Obtener el ID de la característica encontrada
     const caracteristicaId = caracteristica.id;
 
-    // Buscar los comportamientos asociados con la característica
     const comportamientos = await Behaviour.findAll({
       where: { characteristic_id: caracteristicaId },
-      attributes: ["description"], // Seleccionar solo la descripción del comportamiento
+      attributes: ["description"],
     });
 
     if (!comportamientos || comportamientos.length === 0) {
@@ -73,10 +68,8 @@ export const searchOne = async (req, res) => {
       });
     }
 
-    // Construir el mensaje con las descripciones de los comportamientos
     let mensaje = "Behaviors associated with promoting equity include";
 
-    // Iterar sobre los comportamientos y agregar sus descripciones al mensaje
     comportamientos.forEach((comportamiento, index) => {
       if (index === 0) {
         mensaje += ` ${comportamiento.description}`;
@@ -89,7 +82,6 @@ export const searchOne = async (req, res) => {
 
     mensaje += ".";
 
-    // Enviar el mensaje como respuesta
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -176,9 +168,8 @@ export const searchTwo = async (req, res) => {
 
 export const searchThree = async (req, res) => {
   try {
-    // Buscar el test "Wisconsin Card Sorting Test" por su ID
     const testId = 33;
-    const test = await Cognitive_test.findOne({
+    const test = await CognitiveTest.findOne({
       where: { id: testId },
       include: [
         {
@@ -195,10 +186,8 @@ export const searchThree = async (req, res) => {
       });
     }
 
-    // Obtener la descripción del test
     const testDescription = test.description;
 
-    // Buscar las tareas psicológicas relacionadas con el test
     const relaciones = await PsychologicalTaskCognitiveTest.findAll({
       where: { cognitive_test_id: testId },
       include: [
@@ -215,12 +204,10 @@ export const searchThree = async (req, res) => {
       });
     }
 
-    // Obtener los nombres de las tareas psicológicas
     const tareas = relaciones.map(
       (relacion) => relacion["psychological_task_cognitive_test-t"].name
     );
 
-    // Construir el mensaje con la descripción del test y las tareas psicológicas
     let mensaje = `The Wisconsin Card Sorting Test ${testDescription} and It applies the following tasks: `;
     if (tareas.length > 1) {
       mensaje += tareas.slice(0, -1).join(", ");
@@ -231,7 +218,6 @@ export const searchThree = async (req, res) => {
 
     mensaje += ".";
 
-    // Enviar el mensaje como respuesta
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -300,18 +286,16 @@ export const searchFour = async (req, res) => {
         .json({ message: "No positive valence emotion descriptions found." });
     }
 
-    let responseMessage =
-      "The emotions perceived as positive in terms of valence are ";
-    responseMessage += emotionDescriptions.slice(0, -1).join(", ");
+    let mensaje = "The emotions perceived as positive in terms of valence are ";
+    mensaje += emotionDescriptions.slice(0, -1).join(", ");
     if (emotionDescriptions.length > 1) {
-      responseMessage +=
-        " and " + emotionDescriptions[emotionDescriptions.length - 1];
+      mensaje += " and " + emotionDescriptions[emotionDescriptions.length - 1];
     } else {
-      responseMessage += emotionDescriptions[0];
+      mensaje += emotionDescriptions[0];
     }
-    responseMessage += ".";
+    mensaje += ".";
 
-    res.status(200).json({ message: responseMessage });
+    res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: error.message });
@@ -385,12 +369,51 @@ export const searchFive = async (req, res) => {
   }
 };
 
+export const searchSix = async (req, res) => {
+  try {
+    const allTests = await CognitiveTest.findAll();
+
+    const validTests = allTests.filter((test) => {
+      if (!test.age_rank) return false;
+
+      const ageRange = test.age_rank.split(" - ");
+      if (ageRange.length !== 2) return false;
+
+      const minAge = parseInt(ageRange[0]);
+      const maxAge = parseInt(ageRange[1].split(" ")[0]);
+
+      return minAge <= 10 && maxAge >= 5;
+    });
+
+    if (validTests.length === 0) {
+      return res.status(404).json({
+        message:
+          "No cognitive tests found for children between 5 and 10 years old.",
+      });
+    }
+
+    const testNames = validTests.map((test) => test.name);
+
+    let mensaje =
+      "The tests that can be applied to children between 5 and 10 years old are ";
+    if (testNames.length === 1) {
+      mensaje += testNames[0] + ".";
+    } else {
+      const lastTest = testNames.pop();
+      mensaje += testNames.join(", ") + " and " + lastTest + ".";
+    }
+
+    res.status(200).json({ mensaje });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const searchSeven = async (req, res) => {
   try {
-    // Definir el ID de la característica "Sentir que se tiene control de todo"
     const characteristicId = 5;
 
-    // Buscar los parámetros asociados con la característica
     const parametros = await Parameter.findAll({
       where: { characteristic_id: characteristicId },
       include: [
@@ -408,7 +431,6 @@ export const searchSeven = async (req, res) => {
       });
     }
 
-    // Construir el mensaje con los parámetros y sus valores
     const parametrosFormatted = parametros.map(
       (parametro) =>
         `${parametro["parameter-characteristic"].name}: ${parametro.value}`
@@ -542,10 +564,17 @@ export const searchNine = async (req, res) => {
       });
     }
 
-    const nombresCaracteristicas = caracteristicas
-      .map((c) => c["emotion_characteristic-c"].name)
-      .join(", ");
-    const mensaje = `The characteristics to know that a person is sad are: ${nombresCaracteristicas}`;
+    const nombresCaracteristicas = caracteristicas.map(
+      (c) => c["emotion_characteristic-c"].name
+    );
+
+    let mensaje = "The characteristics to know that a person is sad are ";
+    if (nombresCaracteristicas.length === 1) {
+      mensaje += nombresCaracteristicas[0];
+    } else {
+      mensaje += nombresCaracteristicas.slice(0, -1).join(", ");
+      mensaje += " and " + nombresCaracteristicas.slice(-1)[0];
+    }
 
     res.status(200).json({ mensaje });
   } catch (error) {
@@ -604,7 +633,7 @@ export const searchTen = async (req, res) => {
           {
             model: Mechanic,
             as: "mechanic_complementary_activity-m",
-            attributes: ["name"], // Solo obtenemos el nombre de las mecánicas
+            attributes: ["name"],
           },
         ],
       });
@@ -614,9 +643,15 @@ export const searchTen = async (req, res) => {
       });
     }
 
-    const nombresMecanicas = Array.from(mecanicasSet).join(", ");
-    const mensaje = `The mechanics to promote attention in a serious game are: ${nombresMecanicas}`;
-    console.log(mensaje);
+    const nombresMecanicas = Array.from(mecanicasSet);
+
+    let mensaje = "The mechanics to promote attention in a serious game are ";
+    if (nombresMecanicas.length === 1) {
+      mensaje += nombresMecanicas[0];
+    } else {
+      mensaje += nombresMecanicas.slice(0, -1).join(", ");
+      mensaje += " and " + nombresMecanicas.slice(-1)[0];
+    }
 
     res.status(200).json({ mensaje });
   } catch (error) {
@@ -644,9 +679,9 @@ export const searchEleven = async (req, res) => {
       ],
     });
     if (registro) {
-      const mensaje = `The ${registro["mechanic_complementary_activity-c"].name} allows the development of ${registro["mechanic_complementary_activity-m"].name}`;
-      console.log(mensaje);
-      res.status(200).json(mensaje);
+      const mensaje = `Implementing ${registro["mechanic_complementary_activity-c"].name} sessions in your work can provide numerous benefits, including ${registro["mechanic_complementary_activity-m"].name}. Meditation has been shown to promote relaxation and mental clarity, leading to a more positive work environment and better overall job satisfaction. Additionally, regular meditation practice can help employees manage work-related pressures more effectively, leading to decreased absenteeism and turnover rates. Overall, integrating ${registro["mechanic_complementary_activity-c"].name} into your workplace wellness program can contribute to a happier, healthier, and more productive workforce.`;
+
+      res.status(200).json({ mensaje });
     } else {
       res.status(404).json({ message: "Registro no encontrado" });
     }
@@ -670,13 +705,15 @@ export const searchTwelve = async (req, res) => {
       ],
     });
     if (registro) {
-      //ciclo para obtener los nombres de las actividades y concatenarlos en un mensaje
       const actividades = [];
       for (const actividad of registro) {
         actividades.push(actividad["mechanic_complementary_activity-c"].name);
       }
-      const mensaje = `${actividades.join(", ")}`;
-      res.status(200).json(mensaje);
+      const mensaje = `As a teacher, you can strengthen your students' decision-making skills by incorporating activities such as ${actividades.join(
+        ", "
+      )}. These activities have been shown to enhance decision-making abilities by encouraging students to engage in critical thinking and problem-solving. By providing opportunities for students to practice making decisions in various contexts, you can help them develop confidence in their abilities and become more effective decision-makers.`;
+      console.log(mensaje);
+      res.status(200).json({ mensaje });
     } else {
       res.status(404).json({ message: "Registro no encontrado" });
     }
@@ -700,9 +737,10 @@ export const searchThirteen = async (req, res) => {
       });
     }
 
-    const mensaje = `Due to feelings of ${
-      registroOne.description
-    }, ${registroTwo.map((r) => r.description).join(", ")}`;
+    const feelings = registroTwo.map((r) => r.description).join(", ");
+    const reason = `Due to feelings of ${registroOne.description}, ${feelings}`;
+
+    const mensaje = `The desire to isolate oneself from others occurs ${reason}. This combination of emotions, including ${feelings}, can lead individuals to seek solitude as a means of coping with or avoiding overwhelming emotions. Understanding and addressing these underlying feelings is essential in promoting emotional well-being and fostering healthy social connections.`;
 
     res.status(200).json({ mensaje: "Registros encontrados", mensaje });
   } catch (error) {
@@ -725,17 +763,19 @@ export const searchFourteen = async (req, res) => {
       ],
     });
 
-    if (!registro) {
+    if (!registro || registro.length === 0) {
       return res.status(404).json({
         message: "No se encontraron registros con los IDs dados.",
       });
     }
-    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
-    const tests = [];
-    for (const test of registro) {
-      tests.push(test["psychological_task_cognitive_test-c"].name);
-    }
-    const mensaje = tests.join(", ");
+
+    const tests = registro.map(
+      (test) => test["psychological_task_cognitive_test-c"].name
+    );
+    const mensaje = `The following tests can be applied to evaluate intellectual performance ${tests.join(
+      ", "
+    )}. These tests are designed to assess various cognitive abilities, including memory, attention, problem-solving, and reasoning skills, providing valuable insights into an individual's cognitive functioning.`;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -757,17 +797,19 @@ export const searchFifteen = async (req, res) => {
       ],
     });
 
-    if (!registro) {
+    if (!registro || registro.length === 0) {
       return res.status(404).json({
         message: "No se encontraron registros con los IDs dados.",
       });
     }
-    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
-    const tests = [];
-    for (const test of registro) {
-      tests.push(test["psychological_task_cognitive_test-c"].name);
-    }
-    const mensaje = tests.join(", ");
+
+    const tests = registro.map(
+      (test) => test["psychological_task_cognitive_test-c"].name
+    );
+    const mensaje = `A person's memory can be evaluated through various cognitive tests, including: ${tests.join(
+      ", "
+    )}. These tests are designed to assess different aspects of memory, such as short-term memory, long-term memory, and working memory. They often involve tasks like recalling information, recognizing patterns, and memorizing sequences, providing insights into an individual's memory abilities.`;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -776,7 +818,6 @@ export const searchFifteen = async (req, res) => {
 };
 
 export const searchSixteen = async (req, res) => {
-
   try {
     const registro = await PsychologicalTaskCognitiveTest.findAll({
       where: {
@@ -790,23 +831,24 @@ export const searchSixteen = async (req, res) => {
       ],
     });
 
-    if (!registro) {
+    if (!registro || registro.length === 0) {
       return res.status(404).json({
         message: "No se encontraron registros con los IDs dados.",
       });
     }
-    //ciclo para obtener los nombres de los tests y concatenarlos en un mensaje
-    const tests = [];
-    for (const test of registro) {
-      tests.push(test["psychological_task_cognitive_test-c"].name);
-    }
-    const mensaje = tests.join(", ");
+
+    const tests = registro.map(
+      (test) => test["psychological_task_cognitive_test-c"].name
+    );
+    const mensaje = `A person's attention span and concentration can be evaluated through various cognitive tests, including ${tests.join(
+      ", "
+    )}. These tests are designed to measure the individual's ability to focus on tasks, sustain attention over time, and resist distractions. They often involve tasks like reaction time tests, attentional blink tests, and sustained attention tasks, providing insights into the person's attentional capabilities.`;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: error.message });
   }
-
 };
 
 export const searchSeventeen = async (req, res) => {
@@ -829,7 +871,9 @@ export const searchSeventeen = async (req, res) => {
       });
     }
 
-    const mensaje = registro["congnitive-test_application-type"].description;
+    const applicationTypeDescription =
+      registro["congnitive-test_application-type"].description;
+    const mensaje = `Lateral Thinking Exercises primarily engage cognitive functions such as ${applicationTypeDescription}. These exercises encourage individuals to think outside the box, explore unconventional solutions, and challenge established patterns of thought, thereby enhancing their ability to approach problems from different perspectives.`;
 
     res.status(200).json({ mensaje });
   } catch (error) {
@@ -858,11 +902,13 @@ export const searchEighteen = async (req, res) => {
       });
     }
 
-    const mechanics = [];
-    for (const mechanic of registro) {
-      mechanics.push(mechanic["mechanic_complementary_activity-m"].name);
-    }
-    const mensaje = mechanics.join(", ");
+    const mechanics = registro.map(
+      (mechanic) => mechanic["mechanic_complementary_activity-m"].name
+    );
+    const mensaje = `The Stroop test is applied using mechanics such as ${mechanics.join(
+      ", "
+    )}. This test assesses cognitive processing speed and selective attention by measuring the interference in reaction time when the brain is presented with conflicting information regarding color and word meaning.`;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);
@@ -884,17 +930,16 @@ export const searchNineteen = async (req, res) => {
       ],
     });
 
-    if (!registro) {
+    if (!registro || registro.length === 0) {
       return res.status(404).json({
-        message: "No se encontraron registros con los IDs dados.",
+        message: "No records found with the given IDs.",
       });
     }
-    const ids = [];
-    for (const id of registro) {
-      ids.push(
+
+    const ids = registro.map(
+      (id) =>
         id["complementary_activity_cognitive_function-cognitive_function"].id
-      );
-    }
+    );
 
     const basic = await Basic_cognitive_function.findOne({
       where: { id: ids[0] },
@@ -905,6 +950,7 @@ export const searchNineteen = async (req, res) => {
         },
       ],
     });
+
     const complex = await Complex_cognitive_function.findOne({
       where: { id: ids[1] },
       include: [
@@ -917,11 +963,17 @@ export const searchNineteen = async (req, res) => {
 
     if (!basic || !complex) {
       return res.status(404).json({
-        message: "No se encontraron registros con los IDs dados.",
+        message: "No records found with the given IDs.",
       });
     }
 
-    const mensaje = `${basic["b-cognitive-function_b-cognitive-function-type"].description}, ${complex["complex_cognitive_function-Complex_cognitive_function_type"].description}`;
+    const basicDescription =
+      basic["b-cognitive-function_b-cognitive-function-type"].description;
+    const complexDescription =
+      complex["complex_cognitive_function-Complex_cognitive_function_type"]
+        .description;
+
+    const mensaje = `The mechanics of a puzzle game are ${basicDescription} and ${complexDescription}`;
 
     res.status(200).json({ mensaje });
   } catch (error) {
@@ -930,7 +982,7 @@ export const searchNineteen = async (req, res) => {
   }
 };
 
-export const searchTewenty = async (req, res) => {
+export const searchTwenty = async (req, res) => {
   try {
     const registro = await Behaviour.findOne({
       where: {
@@ -946,10 +998,14 @@ export const searchTewenty = async (req, res) => {
 
     if (!registro) {
       return res.status(404).json({
-        message: "No se encontraron registros con los IDs dados.",
+        message: "No records found with the given IDs.",
       });
     }
-    const mensaje = registro["behaviour_characteristic"].name;
+
+    const characteristicName = registro["behaviour_characteristic"].name;
+
+    const mensaje = `The state of constant alert and vigilance in the face of possible dangers is characterized by ${characteristicName}`;
+
     res.status(200).json({ mensaje });
   } catch (error) {
     console.error("Error:", error);

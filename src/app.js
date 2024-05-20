@@ -1,7 +1,6 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import  RouterSearchEleven  from "./routes/search.routes.js";
 
 import Question from "./models/question.js";
 import { Sequelize } from "sequelize";
@@ -19,13 +18,13 @@ app.use(
 app.use(morgan("dev"));
 app.use(express.json());
 
-app.use("/search", RouterSearchEleven);
 const methodMap = {
   1: searchController.searchOne,
   2: searchController.searchTwo,
   3: searchController.searchThree,
   4: searchController.searchFour,
   5: searchController.searchFive,
+  6: searchController.searchSix,
   7: searchController.searchSeven,
   8: searchController.searchEigth,
   9: searchController.searchNine,
@@ -39,7 +38,7 @@ const methodMap = {
   17: searchController.searchSeventeen,
   18: searchController.searchEighteen,
   19: searchController.searchNineteen,
-  20: searchController.searchTewenty,
+  20: searchController.searchTwenty,
 };
 
 app.post("/defineQuestion", async (req, res) => {
@@ -87,7 +86,5 @@ app.post("/defineQuestion", async (req, res) => {
       .json({ Status: "Error", message: "Error interno del servidor" });
   }
 });
-
-
 
 export default app;

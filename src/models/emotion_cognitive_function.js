@@ -21,13 +21,13 @@ const Emotion_cognitive_function = sequelize.define(
   }
 );
 
-Capability_cognitive_function.belongsTo(Emotion, {
+Emotion_cognitive_function.belongsTo(Emotion, {
   foreignKey: "emotion_id",
   targetKey: "id",
   as: "emotion_cognitive_function-capability",
 });
 
-Capability_cognitive_function.belongsTo(Cognitive_function, {
+Emotion_cognitive_function.belongsTo(Cognitive_function, {
   foreignKey: "cognitive_function_id",
   targetKey: "id",
   as: "emotion_cognitive_function-cognitive_function",
