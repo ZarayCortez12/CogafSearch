@@ -11,7 +11,7 @@ function Buscador() {
   const [serverResponse, setServerResponse] = useState("");
   const [error, setError] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("bg-while");
-  const [questions, setQuestions] = useState([]); // Cambiado a array para manejar múltiples preguntas
+  const [questions, setQuestions] = useState([]); // Inicializado como un array vacío
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -40,21 +40,14 @@ function Buscador() {
   };
 
   const handleSearchQuestions = async () => {
-    const searchQuery = inputValue.trim();
-    if (searchQuery) {
-      try {
-        const response = await axios.post(
-          'http://localhost:4000/search',
-          { query: searchQuery}
-        );
-        setQuestions(response.data);
-      } catch (error) {
-        console.error('Error al realizar la solicitud:', error);
-      }
+    try {
+      const response = await axios.get("http://localhost:4000/search");
+      console.log(response.data);
+      setQuestions(response.data.question);
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
     }
-};
-
-
+  };
 
   const handleBackgroundChange = () => {
     setBackgroundColor(
@@ -66,7 +59,19 @@ function Buscador() {
     setInputValue(question);
     handleSearch(question);
     handleSearchQuestions();
-};
+  };
+
+  function renderQuestions() {
+    if (questions.length === 0) {
+      return;
+    } else {
+      return questions.map((question, index) => (
+        <div key={index}>
+          <h1>{question.description}</h1>
+        </div>
+      ));
+    }
+  }
   return (
     <>
       <NavBar onBackgroundChange={handleBackgroundChange} />
@@ -104,18 +109,15 @@ function Buscador() {
           backgroundColor={backgroundColor}
           mensaje={serverResponse.mensaje}
         />
-        
       )}
 
-{questions.map((question, index) => (
-  <div key={index}>
-    <h1>{question.description}</h1>
-  </div>
-))}
-
+      {renderQuestions()}
 
       {!error && !serverResponse && (
-        <Preguntas backgroundColor={backgroundColor} onQuestionClick={handleQuestionClick} />
+        <Preguntas
+          backgroundColor={backgroundColor}
+          onQuestionClick={handleQuestionClick}
+        />
       )}
     </>
   );
