@@ -9,6 +9,9 @@ const Question = sequelize.define("question", {
   description: {
     type: Sequelize.STRING,
   },
+  type: {    
+    type: Sequelize.STRING,
+  },
 }, {
   tableName: 'question', // Especificar el nombre de la tabla aquí
   timestamps: false
