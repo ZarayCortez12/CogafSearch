@@ -141,7 +141,7 @@ function Characteristics() {
           onChange={(e) => {
             const selected = e.target.value;
             setSelectedOption(selected);
-            handleSearch(inputValue, selected); // Asegúrate de pasar el valor seleccionado
+            handleSearch(inputValue,e.target.value); // Asegúrate de pasar el valor seleccionado
           }}
         >
           <option value="">Characteristic </option>
@@ -165,7 +165,7 @@ function Characteristics() {
           onChange={(e) => {
             const selected = e.target.value;
             setSelectedOption(selected);
-            handleSearch(inputValue, selected);
+            handleSearch(inputValue,e.target.value);
           }}
         >
           <option value="">Emotions </option>

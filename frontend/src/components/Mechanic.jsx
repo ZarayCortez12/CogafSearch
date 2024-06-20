@@ -32,20 +32,24 @@ function Mechanic() {
     setSearchResults([]);
   };
 
-  const handleSearch = async (query, option) => { //agregar lo del selectd
+  const handleSearch = async (query, option) => {
     const question = query || inputValue;
-    if (question.trim() && !inputValue.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) {
+  
+    if (
+      (question.trim() && !question.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) ||
+      (question.trim() && question.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?") && option)
+    ) {
       try {
+        let response;
         if(option != null){
-          const response = await axios.post(
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question,option}
+            { question, option }
           );
-        }
-        else{
-          const response = await axios.post(
+        } else {
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question }  //Avisar a andres
+            { question }  // Avisar a andres
           );
         }
         
@@ -58,7 +62,7 @@ function Mechanic() {
       }
     }
   };
-
+  
   const handleSearchQuestions = async () => {
     try {
      const actividades = await axios.get("http://localhost:4000/select/activities");
@@ -116,7 +120,7 @@ function Mechanic() {
           value={selectedOption}
           onChange={(e) => {
             setSelectedOption(e.target.value);
-            handleSearch(inputValue,selectedOption);
+            handleSearch(inputValue,e.target.value);
           }}
         >
           <option value="">the complementary activity</option>
