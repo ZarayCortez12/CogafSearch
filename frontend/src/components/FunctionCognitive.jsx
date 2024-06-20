@@ -59,13 +59,13 @@ function FunctionCognitive() {
         let response;
         if(option != null){
           response = await axios.post(
-            "http://localhost:4000/defineQuestion",
+            "http://localhost:4000/optionQuestion",
             { question, option }
           );
         } else {
           response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question }  // Avisar a andres
+            { question }  
           );
         }
         
@@ -164,7 +164,7 @@ function FunctionCognitive() {
      inputValue.toLowerCase().includes("what is the application method of the x test?")) {
       return (
         <select
-          className="ml-4 outline-none p-2 border rounded"
+          className="ml-4 outline-none p-2 border rounded w-48"
           value={selectedOption}
           onChange={(e) => {
             setSelectedOption(e.target.value);
@@ -182,7 +182,7 @@ function FunctionCognitive() {
     if (inputValue.toLowerCase().includes("what cognitive functions are present in x skill?") ) {
      return (
        <select
-         className="ml-4 outline-none p-2 border rounded"
+         className="ml-4 outline-none p-2 border rounded w-48"
          value={selectedOption}
          onChange={(e) => {
            setSelectedOption(e.target.value);
@@ -203,7 +203,7 @@ function FunctionCognitive() {
 ) {
   return (
     <select
-      className="ml-4 outline-none p-2 border rounded"
+      className="ml-4 outline-none p-2 border rounded w-48"
       value={selectedOption}
       onChange={(e) => {
         const selected = e.target.value;
@@ -227,7 +227,7 @@ if (inputValue
 ) {
 return (
   <select
-    className="ml-4 outline-none p-2 border rounded"
+    className="ml-4 outline-none p-2 border rounded w-48"
     value={selectedOption}
     onChange={(e) => {
       const selected = e.target.value;
@@ -251,7 +251,7 @@ if (inputValue
 ) {
 return (
   <select
-    className="ml-4 outline-none p-2 border rounded"
+    className="ml-4 outline-none p-2 border rounded w-48"
     value={selectedOption}
     onChange={(e) => {
       const selected = e.target.value;

@@ -43,13 +43,13 @@ function Mechanic() {
         let response;
         if(option != null){
           response = await axios.post(
-            "http://localhost:4000/defineQuestion",
+            "http://localhost:4000/optionQuestion",
             { question, option }
           );
         } else {
           response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question }  // Avisar a andres
+            { question }  
           );
         }
         
