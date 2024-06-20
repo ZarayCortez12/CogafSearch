@@ -35,28 +35,26 @@ function Characteristics() {
     //agregar lo del selectd
     const question = query || inputValue;
     if (
-      (question.trim() &&
-        !inputValue
-          .toLowerCase()
-          .includes("what characteristics correspond to x emotion?")) &&
-      !inputValue
-        .toLowerCase()
-        .includes("what behavior could x(characteristic) be due to?")
-    ) {
-      //preguntas con x
+      (question.trim() && !question.toLowerCase().includes("what characteristics correspond to x emotion?")) ||
+      (question.trim() && question.toLowerCase().includes("what characteristics correspond to x emotion?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what behavior could x(characteristic) be due to?")) ||
+      (question.trim() && question.toLowerCase().includes("what behavior could x(characteristic) be due to?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what situations could lead to x (characteristic)?")) ||
+      (question.trim() && question.toLowerCase().includes("what situations could lead to x (characteristic)?") && option) ) {
       try {
-        if (option != null) {
-          const response = await axios.post(
+        let response;
+        if(option != null){
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
             { question, option }
           );
         } else {
-          const response = await axios.post(
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question } //Avisar a andres
+            { question }  // Avisar a andres
           );
         }
-
+        
         setServerResponse(response.data);
         setError("");
       } catch (error) {
@@ -99,7 +97,10 @@ function Characteristics() {
     .includes("what characteristics correspond to x emotion?") &&
   !question
     .toLowerCase()
-    .includes("what behavior could x(characteristic) be due to?")
+    .includes("what behavior could x(characteristic) be due to?") &&
+    !question
+    .toLowerCase()
+    .includes("what situations could lead to x (characteristic)?")
     ) {
       //preguntas con seleccion
       // Solo llamar a handleSearch si no es la pregunta específica
@@ -132,7 +133,10 @@ function Characteristics() {
     if (
       inputValue
         .toLowerCase()
-        .includes("what behavior could x(characteristic) be due to?")
+        .includes("what behavior could x(characteristic) be due to?") ||
+        inputValue
+        .toLowerCase()
+        .includes("what situations could lead to x (characteristic)?")
     ) {
       return (
         <select

@@ -15,7 +15,12 @@ function FunctionCognitive() {
   const [showQuestions, setShowQuestions] = useState(true); // Estado para controlar la visibilidad de las preguntas
   const [selectedOption, setSelectedOption] = useState(""); // Estado para manejar el valor seleccionado del select
 
-  const [activities, setActivities] = useState([]);
+  const [test, setTest] = useState([]);
+  const [capability, setCapability] = useState([]);
+  const [emotion,setEmotion] = useState([]);
+  const [edad,setEdad] = useState([]);
+  const [task,setTask] =useState([]);
+
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -33,21 +38,37 @@ function FunctionCognitive() {
   const handleSearch = async (query, option) => {
     //agregar lo del selectd
     const question = query || inputValue;
-    if (question.trim() && !inputValue.toLowerCase().includes("")) {
+    if (
+      (question.trim() && !question.toLowerCase().includes("what cognitive functions are present in x skill?")) ||
+      (question.trim() && question.toLowerCase().includes("what cognitive functions are present in x skill?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what fc evaluates x cognitive test?")) ||
+      (question.trim() && question.toLowerCase().includes("what fc evaluates x cognitive test?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what psychological tasks are included in x cognitive test?")) ||
+      (question.trim() && question.toLowerCase().includes("what psychological tasks are included in x cognitive test?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what fcs are related to x emotion?")) ||
+      (question.trim() && question.toLowerCase().includes("what fcs are related to x emotion?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what psychological tasks allow me to measure memory in people between x (age range)?")) ||
+      (question.trim() && question.toLowerCase().includes("what psychological tasks allow me to measure memory in people between x (age range)?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("how can you x (psychological task) of a person?")) ||
+      (question.trim() && question.toLowerCase().includes("how can you x (psychological task) of a person?") && option) ||
+      (question.trim() && !question.toLowerCase().includes("what is the application method of the x test?")) ||
+      (question.trim() && question.toLowerCase().includes("what is the application method of the x test?") && option) 
+    ) {
       //pregunta con x
       try {
-        if (option != null) {
-          const response = await axios.post(
+        let response;
+        if(option != null){
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
             { question, option }
           );
         } else {
-          const response = await axios.post(
+          response = await axios.post(
             "http://localhost:4000/defineQuestion",
-            { question } //Avisar a andres
+            { question }  // Avisar a andres
           );
         }
-
+        
         setServerResponse(response.data);
         setError("");
       } catch (error) {
@@ -60,10 +81,32 @@ function FunctionCognitive() {
 
   const handleSearchQuestions = async () => {
     try {
-      const actividades = await axios.get(
-        "http://localhost:4000/select/activities"
+      const test = await axios.get(
+        "http://localhost:4000/select/tests"
       );
-      setActivities(actividades.data.activityNames);
+      setTest(test.data.testNames);
+
+      const emotion = await axios.get(
+        "http://localhost:4000/select/emotions"
+      );
+      setEmotion(emotion.data.emotions);
+
+      const task = await axios.get(
+        "http://localhost:4000/select/tasks"
+      );
+      setTask(task.data.taskNames);
+
+      const capability = await axios.get(
+        "http://localhost:4000/select/capabilities"
+      );
+      setCapability(capability.data.capabilityNames);
+      
+      const age = await axios.get(
+        "http://localhost:4000/select/age-rank"
+      );
+      setEdad(age.data.ageRanks);
+      
+
       const response = await axios.get("http://localhost:4000/search");
       setQuestions(response.data.question);
     } catch (error) {
@@ -81,7 +124,13 @@ function FunctionCognitive() {
     setInputValue(question);
 
     // Verificar si se trata de la pregunta específica manejada por el select
-    if (!question.toLowerCase().includes("wh")) {
+    if (!question.toLowerCase().includes("what cognitive functions are present in x skill?") &&  //
+    !question.toLowerCase().includes("what fc evaluates x cognitive test?") && //
+    !question.toLowerCase().includes("what psychological tasks are included in x cognitive test?") && //
+    !question.toLowerCase().includes("what fcs are related to x emotion?") && //
+    !question.toLowerCase().includes("what psychological tasks allow me to measure memory in people between x (age range)?") &&
+    !question.toLowerCase().includes("how can you x (psychological task) of a person?") &&
+    !question.toLowerCase().includes("what is the application method of the x test?")) { //
       //preguntas con x
       // Solo llamar a handleSearch si no es la pregunta específica
       handleSearch(question);
@@ -110,26 +159,116 @@ function FunctionCognitive() {
 
   // Renderizar el select si la pregunta específica está presente en inputValue
   const renderSelect = () => {
-    if (inputValue.toLowerCase().includes("")) {
-      //pregunta con x
+    if (inputValue.toLowerCase().includes("what fc evaluates x cognitive test?") ||
+     inputValue.toLowerCase().includes("what psychological tasks are included in x cognitive test?") ||
+     inputValue.toLowerCase().includes("what is the application method of the x test?")) {
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
           onChange={(e) => {
             setSelectedOption(e.target.value);
-            handleSearch(inputValue, selectedOption);
+            handleSearch(inputValue,e.target.value);
           }}
         >
-          <option value="">the complementary activity</option>
-          {activities.map((activity, index) => (
-            <option key={index} value={activity}>
-              {activity}
-            </option>
+          <option value="">Tests </option>
+          {test.map((test, index) => (
+            <option key={index} value={test}>{test}</option>
           ))}
         </select>
       );
     }
+
+    if (inputValue.toLowerCase().includes("what cognitive functions are present in x skill?") ) {
+     return (
+       <select
+         className="ml-4 outline-none p-2 border rounded"
+         value={selectedOption}
+         onChange={(e) => {
+           setSelectedOption(e.target.value);
+           handleSearch(inputValue,e.target.value);
+         }}
+       >
+         <option value="">Capability </option>
+         {capability.map((capability, index) => (
+           <option key={index} value={capability}>{capability}</option>
+         ))}
+       </select>
+     );
+   }
+
+   if (inputValue
+    .toLowerCase()
+    .includes("what fcs are related to x emotion?")
+) {
+  return (
+    <select
+      className="ml-4 outline-none p-2 border rounded"
+      value={selectedOption}
+      onChange={(e) => {
+        const selected = e.target.value;
+        setSelectedOption(selected);
+        handleSearch(inputValue,e.target.value);
+      }}
+    >
+      <option value="">Emotions </option>
+      {emotion.map((emotions, index) => (
+        <option key={index} value={emotions}>
+          {emotions}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+if (inputValue
+  .toLowerCase()
+  .includes("what psychological tasks allow me to measure memory in people between x (age range)?")
+) {
+return (
+  <select
+    className="ml-4 outline-none p-2 border rounded"
+    value={selectedOption}
+    onChange={(e) => {
+      const selected = e.target.value;
+      setSelectedOption(selected);
+      handleSearch(inputValue,e.target.value);
+    }}
+  >
+    <option value="">Age </option>
+    {edad.map((edad, index) => (
+      <option key={index} value={edad}>
+        {edad}
+      </option>
+    ))}
+  </select>
+);
+}
+
+if (inputValue
+  .toLowerCase()
+  .includes("how can you x (psychological task) of a person?")
+) {
+return (
+  <select
+    className="ml-4 outline-none p-2 border rounded"
+    value={selectedOption}
+    onChange={(e) => {
+      const selected = e.target.value;
+      setSelectedOption(selected);
+      handleSearch(inputValue,e.target.value);
+    }}
+  >
+    <option value="">Task </option>
+    {task.map((task, index) => (
+      <option key={index} value={task}>
+        {task}
+      </option>
+    ))}
+  </select>
+);
+}
+
     return null;
   };
 
