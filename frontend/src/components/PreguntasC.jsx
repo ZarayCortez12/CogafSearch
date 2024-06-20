@@ -2,15 +2,11 @@ import React from "react";
 import { IoAddCircle } from "react-icons/io5";
 import preguntas from "../images/preguntas.png";
 
-function Preguntas({ backgroundColor, onQuestionClick }) {
+function PreguntasC({ backgroundColor, onQuestionClick }) {
   const textColor = backgroundColor === "bg-while" ? "text-black" : "text-white";
 
   const questions = [
-    "What game mechanics are key to inhibitory control?",
-    "What mechanics should a serious game follow if it wants to promote attention?",
-    "I am a teacher, how can I strengthen the decision-making capacity of my student?",
-    "What events make a person want to isolate themselves from others?"
-
+    "What are the predominant cognitive functions in a person who is in shock?"
   ];
 
   return (
@@ -37,7 +33,7 @@ function Preguntas({ backgroundColor, onQuestionClick }) {
   );
 }
 
-export default Preguntas;
+export default PreguntasC;
 
 
 

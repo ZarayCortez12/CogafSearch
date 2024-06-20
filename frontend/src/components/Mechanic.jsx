@@ -32,14 +32,23 @@ function Mechanic() {
     setSearchResults([]);
   };
 
-  const handleSearch = async (query) => { //agregar lo del selectd
+  const handleSearch = async (query, option) => { //agregar lo del selectd
     const question = query || inputValue;
     if (question.trim() && !inputValue.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) {
       try {
-        const response = await axios.post(
-          "http://localhost:4000/defineQuestion",
-          { question }
-        );
+        if(option != null){
+          const response = await axios.post(
+            "http://localhost:4000/defineQuestion",
+            { question,option}
+          );
+        }
+        else{
+          const response = await axios.post(
+            "http://localhost:4000/defineQuestion",
+            { question }  //Avisar a andres
+          );
+        }
+        
         setServerResponse(response.data);
         setError("");
       } catch (error) {

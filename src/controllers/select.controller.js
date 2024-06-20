@@ -98,7 +98,8 @@ export const getEmotions = async (req, res) => {
     const basicNames = basic.map((basic) => basic.description);   
     const secondaryNames = secondary.map((secondary) => secondary.description);   
 
-    res.status(200).json({ basicNames, secondaryNames });
+    const emotions = [...basicNames, ...secondaryNames];
+    res.status(200).json({ emotions});
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ message: error.message });

@@ -4,17 +4,18 @@ import axios from "axios";
 import Encontrado from "./Encontrado";
 import NoEncontrado from "./NoEncontrado";
 import NavBar from "./NavBar";
-import Preguntas from "./Preguntas";
+import PreguntasFC from "./PreguntasFC";
 
-function Mechanic() {
+function FunctionCognitive() {
   const [inputValue, setInputValue] = useState("");
   const [serverResponse, setServerResponse] = useState("");
   const [error, setError] = useState("");
   const [backgroundColor, setBackgroundColor] = useState("bg-while");
   const [questions, setQuestions] = useState([]);
-  const [searchResults, setSearchResults] = useState([]);
   const [showQuestions, setShowQuestions] = useState(true); // Estado para controlar la visibilidad de las preguntas
   const [selectedOption, setSelectedOption] = useState(""); // Estado para manejar el valor seleccionado del select
+
+  const [activities, setActivities] = useState([]);
 
   const handleChange = (e) => {
     setInputValue(e.target.value);
@@ -27,17 +28,26 @@ function Mechanic() {
 
   const clearInput = () => {
     setInputValue("");
-    setSearchResults([]);
   };
 
-  const handleSearch = async (query) => {
+  const handleSearch = async (query, option) => {
+    //agregar lo del selectd
     const question = query || inputValue;
-    if (question.trim()) {
+    if (question.trim() && !inputValue.toLowerCase().includes("")) {
+      //pregunta con x
       try {
-        const response = await axios.post(
-          "http://localhost:4000/defineQuestion",
-          { question }
-        );
+        if (option != null) {
+          const response = await axios.post(
+            "http://localhost:4000/defineQuestion",
+            { question, option }
+          );
+        } else {
+          const response = await axios.post(
+            "http://localhost:4000/defineQuestion",
+            { question } //Avisar a andres
+          );
+        }
+
         setServerResponse(response.data);
         setError("");
       } catch (error) {
@@ -50,6 +60,10 @@ function Mechanic() {
 
   const handleSearchQuestions = async () => {
     try {
+      const actividades = await axios.get(
+        "http://localhost:4000/select/activities"
+      );
+      setActivities(actividades.data.activityNames);
       const response = await axios.get("http://localhost:4000/search");
       setQuestions(response.data.question);
     } catch (error) {
@@ -65,12 +79,18 @@ function Mechanic() {
 
   const handleQuestionClick = (question) => {
     setInputValue(question);
-    handleSearch(question);
+
+    // Verificar si se trata de la pregunta específica manejada por el select
+    if (!question.toLowerCase().includes("wh")) {
+      //preguntas con x
+      // Solo llamar a handleSearch si no es la pregunta específica
+      handleSearch(question);
+    }
+
     setShowQuestions(false); // Ocultar las preguntas cuando se hace clic en una de ellas
   };
 
   function renderQuestions() {
-    console.log(questions);
     const filteredQuestions = questions.filter(
       (question) =>
         question.type === "FC" &&
@@ -90,23 +110,23 @@ function Mechanic() {
 
   // Renderizar el select si la pregunta específica está presente en inputValue
   const renderSelect = () => {
-    if (
-      inputValue
-        .toLowerCase()
-        .includes(
-          "what are the mechanics corresponding to x complementary activity?"
-        )
-    ) {
+    if (inputValue.toLowerCase().includes("")) {
+      //pregunta con x
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
-          onChange={(e) => setSelectedOption(e.target.value)}
+          onChange={(e) => {
+            setSelectedOption(e.target.value);
+            handleSearch(inputValue, selectedOption);
+          }}
         >
-          <option value="complementary activity"></option>
-          <option value="Option 1">Option 1</option>
-          <option value="Option 2">Option 2</option>
-          <option value="Option 3">Option 3</option>
+          <option value="">the complementary activity</option>
+          {activities.map((activity, index) => (
+            <option key={index} value={activity}>
+              {activity}
+            </option>
+          ))}
         </select>
       );
     }
@@ -145,16 +165,13 @@ function Mechanic() {
 
           {renderSelect != null && renderSelect()}
 
-        {/* Llamar a la función renderSelect para mostrar el select */}
-          
+          {/* Llamar a la función renderSelect para mostrar el select */}
         </div>
         {inputValue.length > 0 && showQuestions && (
-  <div className="mt-0 w-full flex flex-col items-center justify-center">
-    {renderQuestions()}
-  </div>
-)}
-        
-
+          <div className="mt-0 w-full flex flex-col items-center justify-center">
+            {renderQuestions()}
+          </div>
+        )}
       </div>
 
       {error && <NoEncontrado backgroundColor={backgroundColor} />}
@@ -167,7 +184,7 @@ function Mechanic() {
       )}
 
       {!error && !serverResponse && (
-        <Preguntas
+        <PreguntasFC
           backgroundColor={backgroundColor}
           onQuestionClick={handleQuestionClick}
         />
@@ -176,4 +193,4 @@ function Mechanic() {
   );
 }
 
-export default Mechanic;
+export default FunctionCognitive;
