@@ -1,7 +1,3 @@
-import Sequelize from "sequelize";
-import Complex_cognitive_function_type from "../models/complex_cognitive_function_type.js";
-import Complex_cognitive_function from "../models/complex_cognitive_function.js";
-import Cognitive_function from "../models/cognitive_function.js";
 import Complementary_activity_cognitive_function from "../models/complementary_activity_cognitive_function.js";
 import Complementary_activity from "../models/complementary_activity.js";
 import Mechanic from "../models/mechanic.js";
@@ -54,34 +50,63 @@ export const defineQuestion = async (req, res) => {
           message: "No se encontraron registros con los IDs dados.",
         });
       }
-      // sacar la propiedad id de cada uno de los registros
-      const question2Id = question2.map(
+      // sacar la propiedad name de cada uno de los registros
+      const question2Name = question2.map(
         (question) =>
           question[
             "complementary_activity_cognitive_function-complementary_activity"
-          ].id
+          ].name
       );
-
-      // para cada una de las question2Id, obtener las mecanicas que se relacionan con cada una de las actividades
-      const mecanicas = question2Id.map(async (id) => {
-        const mecanicasSet = new Set();
-        const relaciones = await Mechanic_complementary_activity.findAll({
-          where: {
-            complementary_activity_id: id,
-          },
-          include: [
-            {
-              model: Mechanic,
-              as: "mechanic_complementary_activity-m",
-            },
-          ],
-        });
-        relaciones.forEach((relacion) => {
-          mecanicasSet.add(relacion["mechanic_complementary_activity-m"].name);
-        });
-        return mecanicasSet;
-      });
-      return res.status(200).json({ mecanicas });
+      return res.status(200).json({ question2Name });
     case 9:
+      const question9 = await Complementary_activity_cognitive_function.findAll({
+        where: { cognitive_function_id: 1 },
+        include: [
+          {
+            model: Complementary_activity,
+            as: "complementary_activity_cognitive_function-complementary_activity",
+          },
+        ],
+      });
+      
+      if (!question9) {
+        return res.status(404).json({
+          message: "No se encontraron registros con los IDs dados.",
+        });
+      }
+      
+      // sacar la propiedad id de cada uno de los registros
+      const question9Id = question9.map(
+        (question) =>
+          question["complementary_activity_cognitive_function-complementary_activity"]
+            .id
+      );
+      
+      // traer el nombre de la mecanica que se relaciona con cada actividad
+      const mecanicas = await Promise.all(
+        question9Id.map(async (id) => {
+          const mecanicasSet = new Set();
+          const relaciones = await Mechanic_complementary_activity.findAll({
+            where: {
+              complementary_activity_id: id,
+            },
+            include: [
+              {
+                model: Mechanic,
+                as: "mechanic_complementary_activity-m",
+              },
+            ],
+          });
+          relaciones.forEach((relacion) => {
+            mecanicasSet.add(relacion["mechanic_complementary_activity-m"].name);
+          });
+          return Array.from(mecanicasSet);
+        })
+      );
+      
+      const allMecanicas = mecanicas.flat();
+      
+      return res.status(200).json({ mecanicas: allMecanicas });
+      
   }
 };
