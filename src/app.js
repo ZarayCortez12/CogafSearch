@@ -6,6 +6,7 @@ import Question from "./models/question.js";
 import { Sequelize } from "sequelize";
 import * as searchController from "./controllers/search.controller.js";
 import RouterSelect from "./routes/select.routes.js";
+import RouterNewSearch from "./routes/newSearch.routes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.use(
 
 app.use(morgan("dev"));
 app.use(express.json());
+app.use("/newSearch", RouterNewSearch);
 app.use("/search", RouterSearch);
 app.use("/select", RouterSelect);
 const methodMap = {
