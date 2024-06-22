@@ -23,19 +23,28 @@ export const defineQuestion = async (req, res) => {
           ],
         }
       );
-      if (!question1) {
+
+      if (!question1 || question1.length === 0) {
         return res.status(404).json({
-          message: "No se encontraron registros con los IDs dados.",
+          message:
+            "No se encontraron actividades complementarias para fomentar el control inhibitorio.",
         });
       }
-      // sacar la propiedad name de cada uno de los registros
-      const question1Name = question1.map(
-        (question) =>
-          question[
-            "complementary_activity_cognitive_function-complementary_activity"
-          ].name
-      );
-      return res.status(200).json({ question1Name });
+
+      // Sacar la propiedad name de cada uno de los registros y unirlos en una cadena
+      const activities = question1
+        .map(
+          (question) =>
+            question[
+              "complementary_activity_cognitive_function-complementary_activity"
+            ].name
+        )
+        .join(", ");
+
+      // Mensaje descriptivo con la lista de actividades concatenadas
+      const message = `Activities that can be applied to promote inhibitory control: ${activities}`;
+
+      return res.status(200).json({ message });
     case 2:
       const question2 = await Complementary_activity_cognitive_function.findAll(
         {
@@ -53,14 +62,21 @@ export const defineQuestion = async (req, res) => {
           message: "No se encontraron registros con los IDs dados.",
         });
       }
-      // sacar la propiedad name de cada uno de los registros
+
+      // Extraer el nombre de cada actividad complementaria
       const question2Name = question2.map(
         (question) =>
           question[
             "complementary_activity_cognitive_function-complementary_activity"
           ].name
       );
-      return res.status(200).json({ question2Name });
+
+      // Construir el mensaje de respuesta
+      const message2 = `Key complementary activities for inhibitory control: ${question2Name.join(
+        ", "
+      )}`;
+
+      return res.status(200).json({ message: message2 });
     case 9:
       const question9 = await Complementary_activity_cognitive_function.findAll(
         {
@@ -113,8 +129,16 @@ export const defineQuestion = async (req, res) => {
       );
 
       const allMecanicas = mecanicas.flat();
+      const message9 = `Mechanics that a serious game must follow to promote perception: ${allMecanicas.join(
+        ", "
+      )}`;
 
-      return res.status(200).json({ mecanicas: allMecanicas });
+      return res.status(200).json({ message: message9 });
+
+    default:
+      return res.status(400).json({
+        message: "Pregunta no válida.",
+      });
   }
 };
 
@@ -141,7 +165,7 @@ export const optionQuestion = async (req, res) => {
           .map((result) => result.description)
           .join(", ");
         return res.status(200).json({
-          message: `Las funciones cognitivas en la ${option} son: ${descriptions}`,
+          message: `Cognitive functions in the ${option} are: ${descriptions}`,
         });
 
       case 4:
@@ -165,7 +189,7 @@ export const optionQuestion = async (req, res) => {
           .map((result) => result.description)
           .join(", ");
         return res.status(200).json({
-          message: `Las funciones cognitivas complejas en el test ${option} son: ${cognitiveTestDescriptions}`,
+          message: `The cognitive functions of the ${option} are: ${cognitiveTestDescriptions}`,
         });
 
       case 5:
@@ -188,7 +212,7 @@ export const optionQuestion = async (req, res) => {
           .map((result) => result.name)
           .join(", ");
         return res.status(200).json({
-          message: `Las tareas psicológicas en el test ${option} son: ${psychologicalTaskNames}`,
+          message: `The psychological tasks of the ${option} are: ${psychologicalTaskNames}`,
         });
       case 6:
         // Verificar si 'option' está en basic_emotion_type
@@ -255,7 +279,7 @@ export const optionQuestion = async (req, res) => {
               .map((result) => result.description)
               .join(", ");
             return res.status(200).json({
-              message: `Las funciones cognitivas complejas para el tipo de emoción básica ${option} son: ${descriptions}`,
+              message: `The cognitive functions for the emotion ${option} are: ${descriptions}`,
             });
           } catch (error) {
             console.error(
@@ -291,7 +315,7 @@ export const optionQuestion = async (req, res) => {
               .map((result) => result.description)
               .join(", ");
             return res.status(200).json({
-              message: `Las funciones cognitivas complejas para el tipo de emoción secundaria ${option} son: ${descriptions}`,
+              message: `The cognitive functions for the emotion ${option} are: ${descriptions}`,
             });
           } catch (error) {
             console.error(
@@ -331,7 +355,7 @@ export const optionQuestion = async (req, res) => {
           }
 
           // Construir la respuesta deseada
-          let characteristicsMessage = `Características y parámetros para la emoción con descripción '${option}': `;
+          let characteristicsMessage = `The characteristics and parameters for the emotion '${option}' are: `;
 
           results.forEach((result, index) => {
             if (index > 0) {
@@ -348,6 +372,45 @@ export const optionQuestion = async (req, res) => {
           return res.status(500).json({
             message:
               "Error al obtener características y parámetros para la emoción.",
+          });
+        }
+
+      case 8:
+        try {
+          const query = `
+      SELECT ct.name AS cognitive_test_name, ct.description AS cognitive_test_description
+      FROM cognitive_test ct
+      JOIN psychological_task_cognitive_test ptct ON ct.id = ptct.cognitive_test_id
+      JOIN psychological_task pt ON ptct.psychological_task_id = pt.id
+      WHERE pt.id = 6
+        AND ct.age_rank = '${option}';
+    `;
+
+          const results = await sequelize.query(query, {
+            type: sequelize.QueryTypes.SELECT,
+          });
+
+          if (!results || results.length === 0) {
+            return res.status(404).json({
+              message: `No se encontraron tests cognitivos para medir y evaluar la inteligencia de una persona y rango de edad '${option}'.`,
+            });
+          }
+
+          // Construir la respuesta deseada
+          let testsMessage = `Cognitive tests to measure and evaluate a person's intelligence within the age range '${option}' are: `;
+
+          results.forEach((result) => {
+            testsMessage += `${result.cognitive_test_name}: ${result.cognitive_test_description}`;
+          });
+
+          return res.status(200).json({
+            message: testsMessage,
+          });
+        } catch (error) {
+          console.error("Error al ejecutar la consulta:", error);
+          return res.status(500).json({
+            message:
+              "Error al obtener tests cognitivos para la tarea psicológica y rango de edad especificados.",
           });
         }
 
