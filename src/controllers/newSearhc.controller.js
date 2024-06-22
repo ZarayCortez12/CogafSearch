@@ -141,13 +141,11 @@ export const optionQuestion = async (req, res) => {
           message: `Las funciones cognitivas en la ${option} son: ${descriptions}`,
         });
 
-      case 4:
-        // Lógica para el caso 4
+      case 4:        
         return res.status(200).json({
-          message: "Consulta para la pregunta 4 no implementada.",
+          message: "fafha.",
         });
-
-      // Agrega más casos según sea necesario
+      
       default:
         return res.status(400).json({
           message: "Pregunta no válida.",
