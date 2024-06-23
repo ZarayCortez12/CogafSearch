@@ -10,6 +10,7 @@ import {
   searchEighteen,
   searchNineteen,
   searchTwenty,
+  searchOneTwo,
   question
 } from "../controllers/search.controller.js";
 
@@ -27,5 +28,6 @@ router.get("/17", searchSeventeen);
 router.get("/18", searchEighteen);
 router.get("/19", searchNineteen);
 router.get("/20", searchTwenty);
+router.get("/21", searchOneTwo);
 
 export default router;

@@ -26,6 +26,15 @@ import PsychologicalTaskCognitiveTest from "../models/psychological_task_cogniti
 import State from "../models/state.js";
 import Parameter from "../models/parameter.js";
 import Question from "../models/question.js";
+import {
+  getTests,
+  getAgeRank,
+  getComplementaryActivities,
+  getCharacteristics,
+  getEmotions,
+  getCapabilities,
+  getPsyciologicalTasks,
+} from "./select.controller.js";
 
 export const question = async (req, res) => {
   try {
@@ -1012,3 +1021,61 @@ export const searchTwenty = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//Preguntas Nuevas
+
+//¿Qué actividades pueden aplicarse para fomentar el control inhibitorio?
+
+export const searchOneTwo = async (req, res) => {
+  try {
+    const cognitiveFuntion = await Complex_cognitive_function_type.findOne({
+      where: {
+        description: "Inhibitory control",
+      },
+    });
+    console.log("funcion_cognitiva", cognitiveFuntion.dataValues);
+
+    const actividades = [];
+
+    const actividadesFunciones =
+      await Complementary_activity_cognitive_function.findAll({
+        where: {
+          cognitive_function_id: cognitiveFuntion.id,
+        },
+      });
+    console.log("actividadesFunciones", actividadesFunciones.length);
+
+    for (const actividad of actividadesFunciones) {
+      const actividadComplementaria = await Complementary_activity.findOne({
+        where: {
+          id: actividad.complementary_activity_id,
+        },
+      });
+      console.log(
+        "actividadComplementaria",
+        actividadComplementaria.dataValues
+      );
+      actividades.push(actividadComplementaria.dataValues.name);
+    }
+    return res.status(200).json({ actividades });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchTwoTwo = async (req, res) => {
+  try {
+    const cognitiveFuntion = await Complex_cognitive_function_type.findOne({
+      where: {
+        description: "Inhibitory control",
+      },
+    });
+    console.log("funcion_cognitiva", cognitiveFuntion.dataValues);
+
+    
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+}

@@ -4,6 +4,13 @@ import Mechanic from "../models/mechanic.js";
 import Mechanic_complementary_activity from "../models/mechanic_complementary_activity.js";
 import { Sequelize } from "sequelize";
 import sequelize from "../database/db.js";
+import Behavior from "../models/behaviour.js";
+import Event from "../models/event.js";
+import Emotion from "../models/emotion.js";
+import EmoTion_Cognitive from "../models/emotion_cognitive_function.js";
+import Cognitive_function from "../models/cognitive_function.js";
+import Complex_Cognitive_Function_Type from "../models/complex_cognitive_function_type.js";
+import Basic_Cognitive_Function_Type from "../models/basic_cognitive_function_type.js";
 
 export const defineQuestion = async (req, res) => {
   const { question } = req.body;
@@ -114,6 +121,165 @@ export const defineQuestion = async (req, res) => {
       const allMecanicas = mecanicas.flat();
 
       return res.status(200).json({ mecanicas: allMecanicas });
+
+    case 10:
+      // obtener la mecanica que se relaciona con la actividad
+      function formatResponse(activities) {
+        if (activities.length === 0) {
+          return "I'm sorry, but no complementary activities were found to strengthen your students' decision-making capacity.";
+        }
+
+        let response =
+          "As a teacher, you can strengthen your students' decision-making capacity through the following activities: ";
+
+        for (let i = 0; i < activities.length; i++) {
+          if (i === activities.length - 1 && activities.length > 1) {
+            response += "and ";
+          }
+          response += activities[i];
+          if (i < activities.length - 2) {
+            response += ", ";
+          } else if (i === activities.length - 2) {
+            response += " ";
+          }
+        }
+
+        response +=
+          ". These activities will help your students develop critical skills for decision-making.";
+
+        return response;
+      }
+
+      const question10 = await Mechanic_complementary_activity.findAll({
+        where: { mechanic_id: 9 },
+        include: [
+          {
+            model: Complementary_activity,
+            as: "mechanic_complementary_activity-c",
+          },
+        ],
+      });
+
+      console.log(question10);
+
+      if (!question10) {
+        return res.status(404).json({
+          message: "No se encontraron registros con los IDs dados.",
+        });
+      }
+
+      // sacar la propiedad name de cada uno de los registros
+      const question10Name = question10.map(
+        (question) => question["mechanic_complementary_activity-c"].name
+      );
+
+      const formattedResponse = formatResponse(question10Name);
+
+      return res.status(200).json({ formattedResponse });
+
+    case 11:
+      const question11 = await Behavior.findOne({
+        where: { id: 12 },
+      });
+
+      const eventName = await Event.findOne({
+        where: { id: question11.event_id },
+      });
+
+      if (!question11) {
+        return res.status(404).json({
+          message: "No se encontraron registros con los IDs dados.",
+        });
+      }
+
+      // sacar la propiedad name de cada uno de los registros
+
+      const response = `Events that might make a person feel like isolating themselves from others include ${eventName.description}.`;
+
+      return res.status(200).json({ response });
+
+    case 17:
+      const question17 = await EmoTion_Cognitive.findAll({
+        where: { emotion_id: 3 },
+        include: [
+          {
+            model: Cognitive_function,
+            as: "emotion_cognitive_function-cognitive_function",
+          },
+        ],
+      });
+
+      if (!question17 || question17.length === 0) {
+        return res.status(404).json({
+          message: "No se encontraron registros con los IDs dados.",
+        });
+      }
+
+      console.log("Esto", question17);
+
+      // Obtener los IDs de las funciones cognitivas
+      const cognitiveIds = question17.map(
+        (question) =>
+          question["emotion_cognitive_function-cognitive_function"].id
+      );
+
+      console.log("IDs de funciones cognitivas:", cognitiveIds);
+
+      // Buscar los nombres de las funciones cognitivas en ambos modelos
+      const cognitiveNames = await Promise.all(
+        cognitiveIds.map(async (id) => {
+          const complexFunction = await Complex_Cognitive_Function_Type.findOne(
+            {
+              where: { id: id },
+            }
+          );
+
+          if (complexFunction) {
+            return complexFunction.description;
+          }
+
+          const basicFunction = await Basic_Cognitive_Function_Type.findOne({
+            where: { id: id },
+          });
+
+          if (basicFunction) {
+            return basicFunction.name;
+          }
+
+          return { type: "Unknown", name: "Function not found" };
+        })
+      );
+
+      console.log("Nombres de funciones cognitivas:", cognitiveNames);
+
+      function formatShockResponse(cognitiveNames) {
+        if (cognitiveNames.length === 0) {
+          return "Based on the available data, we couldn't identify specific cognitive functions associated with shock.";
+        }
+    
+        let response = "The predominant cognitive functions in a person who is in shock are: ";
+    
+        cognitiveNames.forEach((name, index) => {
+          if (index === cognitiveNames.length - 1 && cognitiveNames.length > 1) {
+            response += "and ";
+          }
+          response += name;
+          if (index < cognitiveNames.length - 2) {
+            response += ", ";
+          } else if (index === cognitiveNames.length - 2) {
+            response += " ";
+          }
+        });
+    
+        response += ". These cognitive functions are typically affected or altered during a state of shock, which can significantly impact a person's mental processes and responses.";
+    
+        return response;
+      }
+    
+      const formatdResponse = formatShockResponse(cognitiveNames);
+      return res.status(200).json({
+        formatdResponse,
+      });
   }
 };
 
@@ -136,16 +302,18 @@ export const optionQuestion = async (req, res) => {
             message: "No se encontraron registros con el nombre dado.",
           });
         }
-        const descriptions = results.map((result) => result.description).join(', ');
+        const descriptions = results
+          .map((result) => result.description)
+          .join(", ");
         return res.status(200).json({
           message: `Las funciones cognitivas en la ${option} son: ${descriptions}`,
         });
 
-      case 4:        
+      case 4:
         return res.status(200).json({
           message: "fafha.",
         });
-      
+
       default:
         return res.status(400).json({
           message: "Pregunta no válida.",
