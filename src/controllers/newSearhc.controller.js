@@ -203,7 +203,7 @@ export const defineQuestion = async (req, res) => {
 
       const formattedResponse = formatResponse(question10Name);
 
-      return res.status(200).json({ formattedResponse });
+      return res.status(200).json({ message: formattedResponse });
 
     case 11:
       const question11 = await Behavior.findOne({
@@ -224,7 +224,7 @@ export const defineQuestion = async (req, res) => {
 
       const response = `Events that might make a person feel like isolating themselves from others include ${eventName.description}.`;
 
-      return res.status(200).json({ response });
+      return res.status(200).json({ message: response });
 
     case 17:
       const question17 = await EmoTion_Cognitive.findAll({
@@ -311,7 +311,7 @@ export const defineQuestion = async (req, res) => {
 
       const formatdResponse = formatShockResponse(cognitiveNames);
       return res.status(200).json({
-        formatdResponse,
+        message: formatdResponse
       });
   }
 };
