@@ -6,9 +6,8 @@ function Preguntas({ backgroundColor, onQuestionClick }) {
   const textColor = backgroundColor === "bg-while" ? "text-black" : "text-white";
 
   const questions = [
-    "What game mechanics are key to inhibitory control?",
     "What mechanics should a serious game follow if it wants to promote attention?",
-    "I am a teacher, how can I strengthen the decision-making capacity of my student?",
+    "I am a teacher, how can I strengthen the decision-making capacity of my students?",
     "What events make a person want to isolate themselves from others?"
 
   ];

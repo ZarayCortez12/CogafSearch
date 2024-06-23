@@ -15,6 +15,7 @@ function Mechanic() {
   const [searchResults, setSearchResults] = useState([]);
   const [showQuestions, setShowQuestions] = useState(true); // Estado para controlar la visibilidad de las preguntas
   const [selectedOption, setSelectedOption] = useState(""); // Estado para manejar el valor seleccionado del select
+  const [idQuestion, setIdQuestion] = useState([]);
 
   const [activities, setActivities] = useState([]);
 
@@ -32,27 +33,30 @@ function Mechanic() {
     setSearchResults([]);
   };
 
-  const handleSearch = async (query, option) => {
-    const question = query || inputValue;
-  
-    if (
-      (question.trim() && !question.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) ||
-      (question.trim() && question.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?") && option)
-    ) {
-      try {
-        let response;
+  const handleSearch = async (id, option) => {
+    const question = id || inputValue;
+    const questionObject = { question: question };
+      
+    try {
         if(option != null){
-          response = await axios.post(
+          const response = await axios.get(
             "http://localhost:4000/optionQuestion",
-            { question, option }
+            { questionObject, option }
           );
+          setServerResponse(response);
+          setError("");
         } else {
-          response = await axios.post(
-            "http://localhost:4000/defineQuestion",
-            { question }  
+          console.log("Definida", questionObject);
+
+          const response = await axios.get(
+            "http://localhost:4000/newSearch/defineQuestion",
+            { params: questionObject }    
           );
+
+          console.log(response);
+          setServerResponse(response);
+          setError("");
         }
-        
         setServerResponse(response.data);
         setError("");
       } catch (error) {
@@ -60,9 +64,10 @@ function Mechanic() {
         setError("Error al realizar la solicitud");
         setServerResponse("");
       }
-    }
+    
   };
   
+
   const handleSearchQuestions = async () => {
     try {
      const actividades = await axios.get("http://localhost:4000/select/activities");
@@ -74,6 +79,16 @@ function Mechanic() {
     }
   };
 
+  const handleIdQuestion = (searchDescription) => {
+    for (let question of questions) {
+        if (question.description === searchDescription) {
+         
+            return question.id_question;
+        }
+    }
+    return null; // Devuelve null si no se encuentra la pregunta
+};
+
   const handleBackgroundChange = () => {
     setBackgroundColor(
       backgroundColor === "bg-while" ? "bg-black" : "bg-while"
@@ -84,9 +99,10 @@ function Mechanic() {
     setInputValue(question);
   
     // Verificar si se trata de la pregunta específica manejada por el select
-    if (!question.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) {
+    if (!question.toLowerCase().includes("what are the mechanics corresponding to _______ ?")) {
       // Solo llamar a handleSearch si no es la pregunta específica
-      handleSearch(question);
+      const id = handleIdQuestion(question);
+      handleSearch(id, null);
     }
   
     setShowQuestions(false); // Ocultar las preguntas cuando se hace clic en una de ellas
@@ -113,14 +129,21 @@ function Mechanic() {
 
   // Renderizar el select si la pregunta específica está presente en inputValue
   const renderSelect = () => {
-    if (inputValue.toLowerCase().includes("what are the mechanics corresponding to x complementary activity?")) {
+    if (inputValue.toLowerCase().includes("what are the mechanics corresponding to _______ ?")) {
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
           onChange={(e) => {
-            setSelectedOption(e.target.value);
-            handleSearch(inputValue,e.target.value);
+            const selectedValue = e.target.value;
+            setSelectedOption(selectedValue);
+  
+            // Reemplazar la _____ en la pregunta con la opción seleccionada
+            const updatedInputValue = inputValue.replace("_______", selectedValue);
+            setInputValue(updatedInputValue);
+  
+            // Llamar a handleSearch con la pregunta actualizada
+            handleSearch(updatedInputValue, selectedValue);
           }}
         >
           <option value="">the complementary activity</option>
@@ -132,6 +155,7 @@ function Mechanic() {
     }
     return null;
   };
+  
 
   return (
     <>
@@ -186,7 +210,7 @@ function Mechanic() {
         />
       )}
 
-      {!error && !serverResponse && (
+      {!error && !serverResponse&& (
         <Preguntas
           backgroundColor={backgroundColor}
           onQuestionClick={handleQuestionClick}
