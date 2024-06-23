@@ -41,6 +41,7 @@ function Mechanic() {
     ) {
       try {
         let response;
+        console.log("question: ", question);
         if(option != null){
           response = await axios.post(
             "http://localhost:4000/optionQuestion",
@@ -50,7 +51,7 @@ function Mechanic() {
           response = await axios.post(
             "http://localhost:4000/defineQuestion",
             { question }  
-          );
+          );          
         }
         
         setServerResponse(response.data);
