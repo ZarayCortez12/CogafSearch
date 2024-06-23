@@ -13,6 +13,12 @@ import EmoTion_Cognitive from "../models/emotion_cognitive_function.js";
 import Cognitive_function from "../models/cognitive_function.js";
 import Complex_Cognitive_Function_Type from "../models/complex_cognitive_function_type.js";
 import Basic_Cognitive_Function_Type from "../models/basic_cognitive_function_type.js";
+import Psychological_task from "../models/psychological_task.js";
+import Psychological_task_cognitive_test from "../models/psychological_task_cognitive_test.js";
+import Cognitive_test from "../models/cognitive_test.js";
+import Application_type from "../models/application_type.js";
+import Characteristic from "../models/characteristic.js";
+
 
 export const defineQuestion = async (req, res) => {
   const { question } = req.body;
@@ -580,6 +586,246 @@ export const optionQuestion = async (req, res) => {
             message:
               "Error al obtener tests cognitivos para la tarea psicológica y rango de edad especificados.",
           });
+        }
+
+      case 12:
+        try {
+          // Encuentra la tarea psicológica según el nombre
+          const task = await Psychological_task.findOne({
+            where: { name: option },
+          });
+
+          if (!task) {
+            throw new Error("Psychological task not found");
+          }
+
+          console.log("Task found:", task);
+          // Encuentra las relaciones de tarea psicológica y test cognitivo
+          const taskTests = await Psychological_task_cognitive_test.findAll({
+            where: { psychological_task_id: task.id },
+            include: [
+              {
+                model: Cognitive_test,
+                as: "psychological_task_cognitive_test-c",
+                attributes: ["name"],
+              },
+            ],
+          });
+          console.log("Task tests:", taskTests);
+          // Extrae y retorna los nombres de los tests cognitivos
+          const testNames = taskTests.map(
+            (tt) => tt["psychological_task_cognitive_test-c"].name
+          );
+          console.log("Test names:", testNames.length);
+
+          // Construye el mensaje en inglés
+          let responseMessage;
+          if (testNames.length > 0) {
+            const lastTestName = testNames.pop();
+            const testNamesString =
+              testNames.length > 0
+                ? testNames.join(", ") + " and " + lastTestName
+                : lastTestName;
+            responseMessage = `To evaluate the ${option} in a person, you can use the following cognitive tests ${testNamesString}.`;
+          } else {
+            responseMessage = `There are no cognitive tests available to evaluate the ${option} in a person.`;
+          }
+
+          return res.status(200).json({
+            message: responseMessage,
+          });
+        } catch (error) {
+          console.error("Error fetching cognitive tests by task name:", error);
+          return res.status(500).json({
+            message: "Server error.",
+          });
+        }
+
+      case 13:
+        try {
+          // Encuentra el test cognitivo según el nombre
+          const test = await Cognitive_test.findOne({
+            where: { name: option },
+            include: [
+              {
+                model: Application_type,
+                as: "congnitive-test_application-type",
+                attributes: ["description"],
+              },
+            ],
+          });
+
+          if (!test) {
+            throw new Error("Cognitive test not found");
+          }
+
+          console.log("Test found:", test);
+
+          // Obtén la descripción del tipo de aplicación
+          const applicationMethod =
+            test["congnitive-test_application-type"].description;
+
+          console.log("Application method:", applicationMethod);
+          // Construye el mensaje en inglés
+          const responseMessage = applicationMethod
+            ? `The application method of the ${option} is ${applicationMethod}.`
+            : `No application method found for the ${option}.`;
+
+          return res.status(200).json({
+            message: responseMessage,
+          });
+        } catch (error) {
+          console.error(
+            "Error fetching application method by test name:",
+            error
+          );
+          throw error;
+        }
+
+
+      case 14:
+        try {
+          // Encuentra la actividad complementaria según el nombre
+          const activity = await Complementary_activity.findOne({
+            where: { name: option },
+          });
+      
+          if (!activity) {
+            throw new Error('Complementary activity not found');
+          }
+          
+          console.log('Activity found:', activity);
+          // Encuentra las relaciones de actividad complementaria y mecánicas
+          const activityMechanics = await Mechanic_complementary_activity.findAll({
+            where: { complementary_activity_id: activity.id },
+            include: [
+              {
+                model: Mechanic,
+                as: 'mechanic_complementary_activity-m',
+                attributes: ['name']
+              }
+            ]
+          });
+          console.log('Activity mechanics:', activityMechanics);
+          // Extrae y retorna los nombres de las mecánicas
+          const mechanicNames = activityMechanics.map(am => am['mechanic_complementary_activity-m'].name);
+          console.log('Mechanic names:', mechanicNames);
+      
+          // Construye el mensaje en inglés
+          let responseMessage;
+          if (mechanicNames.length > 0) {
+            const lastMechanicName = mechanicNames.pop();
+            const mechanicNamesString = mechanicNames.length > 0 
+              ? mechanicNames.join(', ') + ' and ' + lastMechanicName 
+              : lastMechanicName;
+            responseMessage = `The mechanics corresponding to the ${option} are: ${mechanicNamesString}.`;
+          } else {
+            responseMessage = `There are no mechanics corresponding to the ${option}.`;
+          }
+          return res.status(200).json({
+            message: responseMessage,
+          });
+        
+          
+        } catch (error) {
+          console.error('Error fetching mechanics by activity name:', error);
+          throw error;
+        }
+
+
+      case 15:
+        try {
+          // Encuentra la característica según el nombre
+          const characteristic = await Characteristic.findOne({
+            where: { name: option },
+          });
+      
+          if (!characteristic) {
+            throw new Error('Characteristic not found');
+          }
+          
+          console.log('Characteristic found:', characteristic);
+          // Encuentra los comportamientos relacionados con la característica
+          const behaviours = await Behavior.findAll({
+            where: { characteristic_id: characteristic.id },
+            attributes: ['description']
+          });
+          console.log('Behaviours found:', behaviours);
+          // Extrae y retorna las descripciones de los comportamientos
+          const behaviourDescriptions = behaviours.map(b => b.description);
+          console.log('Behaviour descriptions:', behaviourDescriptions);
+      
+          // Construye el mensaje en inglés
+          let responseMessage;
+          if (behaviourDescriptions.length > 0) {
+            const lastBehaviourDescription = behaviourDescriptions.pop();
+            const behaviourDescriptionsString = behaviourDescriptions.length > 0 
+              ? behaviourDescriptions.join(', ') + ' and ' + lastBehaviourDescription 
+              : lastBehaviourDescription;
+            responseMessage = `The behavior(s) that could be due to the ${option} are: ${behaviourDescriptionsString}.`;
+          } else {
+            responseMessage = `There are no behaviors found for the ${option}.`;
+          }
+      
+          return res.status(200).json({
+            message: responseMessage,
+          });
+      
+        } catch (error) {
+          console.error('Error fetching behaviors by characteristic name:', error);
+          throw error;
+        }
+
+      case 16:
+        try {
+          // Encuentra la característica según el nombre
+          const characteristic = await Characteristic.findOne({
+            where: { name: option },
+          });
+      
+          if (!characteristic) {
+            throw new Error('Characteristic not found');
+          }
+          
+          console.log('Characteristic found:', characteristic);
+          // Encuentra los comportamientos relacionados con la característica
+          const behaviours = await Behavior.findAll({
+            where: { characteristic_id: characteristic.id },
+            attributes: ['event_id']
+          });
+          console.log('Behaviours found:', behaviours);
+          // Extrae y retorna los IDs de los eventos
+          const eventIds = behaviours.map(b => b.event_id);
+          console.log('Event IDs:', eventIds);
+      
+          // Encuentra los nombres de los eventos según los IDs
+          const events = await Event.findAll({
+            where: { id: eventIds },
+            attributes: ['description']
+          });
+          console.log('Events found:', events);
+          const eventNames = events.map(e => e.description);
+          console.log('Event names:', eventNames);
+      
+          // Construye el mensaje en inglés
+          let responseMessage;
+          if (eventNames.length > 0) {
+            const lastEventName = eventNames.pop();
+            const eventNamesString = eventNames.length > 0 
+              ? eventNames.join(', ') + ' and ' + lastEventName 
+              : lastEventName;
+            responseMessage = `The events that could lead to the ${option} are: ${eventNamesString}.`;
+          } else {
+            responseMessage = `There are no events found that could lead to the ${option}.`;
+          }
+      
+          return res.status(200).json({
+            message: responseMessage,
+          });
+      
+        } catch (error) {
+          console.error('Error fetching events by characteristic name:', error);
+          throw error;
         }
 
       default:
