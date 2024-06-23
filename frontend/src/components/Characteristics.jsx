@@ -31,37 +31,31 @@ function Characteristics() {
     setInputValue("");
   };
 
-  const handleSearch = async (query, option) => {
-    //agregar lo del selectd
-    const question = query || inputValue;
-    if (
-      (question.trim() && !question.toLowerCase().includes("what characteristics correspond to x emotion?")) ||
-      (question.trim() && question.toLowerCase().includes("what characteristics correspond to x emotion?") && option) ||
-      (question.trim() && !question.toLowerCase().includes("what behavior could x(characteristic) be due to?")) ||
-      (question.trim() && question.toLowerCase().includes("what behavior could x(characteristic) be due to?") && option) ||
-      (question.trim() && !question.toLowerCase().includes("what situations could lead to x (characteristic)?")) ||
-      (question.trim() && question.toLowerCase().includes("what situations could lead to x (characteristic)?") && option) ) {
-      try {
-        let response;
-        if(option != null){
-          response = await axios.post(
-            "http://localhost:4000/optionQuestion",
-            { question, option }
-          );
-        } else {
-          response = await axios.post(
-            "http://localhost:4000/defineQuestion",
-            { question }  
-          );
-        }
-        
-        setServerResponse(response.data);
+  const handleSearch = async (id, option) => {
+    try {
+      if (option != null) {
+        const response = await axios.post(
+          "http://localhost:4000/newSearch/optionQuestion",
+          { question: id, option: option }
+        );
+        setSelectedOption("");
+        setServerResponse(response.data.message);
         setError("");
-      } catch (error) {
-        console.error("Error al realizar la solicitud:", error);
-        setError("Error al realizar la solicitud");
-        setServerResponse("");
+      } else {
+        console.log("Definida", id);
+        const response = await axios.post(
+          "http://localhost:4000/newSearch/defineQuestion",
+          {
+            question: id,
+          }
+        );    
+        setServerResponse(response.data.message);
+        setError("");
       }
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
+      setError("Error al realizar la solicitud");
+      setServerResponse("");
     }
   };
 
@@ -82,6 +76,15 @@ function Characteristics() {
     }
   };
 
+  const handleIdQuestion = (searchDescription) => {
+    for (let question of questions) {
+      if (question.description === searchDescription) {
+        return question.id_question;
+      }
+    }
+    return null; // Devuelve null si no se encuentra la pregunta
+  };
+
   const handleBackgroundChange = () => {
     setBackgroundColor(
       backgroundColor === "bg-while" ? "bg-black" : "bg-while"
@@ -94,17 +97,16 @@ function Characteristics() {
     if (
       !question
     .toLowerCase()
-    .includes("what characteristics correspond to x emotion?") &&
+    .includes("what characteristics correspond to _______?") &&
   !question
     .toLowerCase()
-    .includes("what behavior could x(characteristic) be due to?") &&
+    .includes("what behavior could be due to having the  _______ ?") &&
     !question
     .toLowerCase()
-    .includes("what situations could lead to x (characteristic)?")
+    .includes("what events could lead to having the _______ ?")
     ) {
-      //preguntas con seleccion
-      // Solo llamar a handleSearch si no es la pregunta específica
-      handleSearch(question);
+      const id = handleIdQuestion(question);
+      handleSearch(id, null);
     }
 
     setShowQuestions(false); // Ocultar las preguntas cuando se hace clic en una de ellas
@@ -133,22 +135,31 @@ function Characteristics() {
     if (
       inputValue
         .toLowerCase()
-        .includes("what behavior could x(characteristic) be due to?") ||
-        inputValue
+        .includes("what behavior could be due to having the  _______ ?") || inputValue
         .toLowerCase()
-        .includes("what situations could lead to x (characteristic)?")
+        .includes("what events could lead to having the _______ ?")
     ) {
+      const id = handleIdQuestion(inputValue);
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
           onChange={(e) => {
-            const selected = e.target.value;
-            setSelectedOption(selected);
-            handleSearch(inputValue,e.target.value); // Asegúrate de pasar el valor seleccionado
+            const selectedValue = e.target.value;
+            setSelectedOption(e.target.value);
+
+            // Reemplazar la _____ en la pregunta con la opción seleccionada
+            const updatedInputValue = inputValue.replace(
+              "_______",
+              selectedValue
+            );
+            setInputValue(updatedInputValue);
+
+            // Llamar a handleSearch con la pregunta actualizada
+            handleSearch(id, selectedValue);
           }}
         >
-          <option value="">Characteristic </option>
+          <option value="" disabled>Characteristic </option>
           {characteristics.map((characteristic, index) => (
             <option key={index} value={characteristic}>
               {characteristic}
@@ -157,22 +168,32 @@ function Characteristics() {
         </select>
       );
     }  
+    
 
     if (inputValue
         .toLowerCase()
-        .includes("what characteristics correspond to x emotion?")
+        .includes("what characteristics correspond to _______?")
     ) {
+      const id = handleIdQuestion(inputValue);
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
           onChange={(e) => {
-            const selected = e.target.value;
-            setSelectedOption(selected);
-            handleSearch(inputValue,e.target.value);
+            const selectedValue = e.target.value;
+            setSelectedOption(e.target.value);
+             // Reemplazar la _____ en la pregunta con la opción seleccionada
+             const updatedInputValue = inputValue.replace(
+              "_______",
+              selectedValue
+            );
+            setInputValue(updatedInputValue);
+
+            // Llamar a handleSearch con la pregunta actualizada
+            handleSearch(id, selectedValue);
           }}
         >
-          <option value="">Emotions </option>
+          <option value="" disabled>Emotions </option>
           {emotion.map((emotions, index) => (
             <option key={index} value={emotions}>
               {emotions}
@@ -215,7 +236,7 @@ function Characteristics() {
             />
           </div>
 
-          {renderSelect()}
+          {renderSelect != null && renderSelect()}
 
           {/* Llamar a la función renderSelect para mostrar el select */}
         </div>
@@ -231,7 +252,7 @@ function Characteristics() {
       {serverResponse && (
         <Encontrado
           backgroundColor={backgroundColor}
-          mensaje={serverResponse.mensaje}
+          mensaje={serverResponse}
         />
       )}
 
