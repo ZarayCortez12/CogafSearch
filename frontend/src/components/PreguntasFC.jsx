@@ -6,7 +6,8 @@ function PreguntasFC({ backgroundColor, onQuestionClick }) {
   const textColor = backgroundColor === "bg-while" ? "text-black" : "text-white";
 
   const questions = [
-    "What activities can be applied to promote inhibitory control?"
+    "What activities can be applied to promote inhibitory control?",
+    "What complementary activities are key for inhibitory control?"
 
   ];
 

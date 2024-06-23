@@ -35,16 +35,13 @@ function Mechanic() {
 
   const handleSearch = async (id, option) => {
     try {
-      console.log("question: ", id);
-      console.log("option: ", option);
       if (option != null) {
         const response = await axios.post(
-          "http://localhost:4000/optionQuestion",
+          "http://localhost:4000/newSearch/optionQuestion",
           { question: id, option: option }
         );
-
-        console.log("response: ", response);
-        setServerResponse(response);
+        setSelectedOption("");
+        setServerResponse(response.data.message);
         setError("");
       } else {
         console.log("Definida", id);
@@ -53,9 +50,7 @@ function Mechanic() {
           {
             question: id,
           }
-        );
-        console.log("response: ", response.data.message);
-
+        );    
         setServerResponse(response.data.message);
         setError("");
       }
@@ -137,7 +132,6 @@ function Mechanic() {
         .includes("what are the mechanics corresponding to _______ ?")
     ) {
       const id = handleIdQuestion(inputValue);
-      console.log(id);
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
@@ -157,7 +151,7 @@ function Mechanic() {
             handleSearch(id, selectedValue);
           }}
         >
-          <option value="">the complementary activity</option>
+          <option value="" disabled>the complementary activity</option>
           {activities.map((activity, index) => (
             <option key={index} value={activity}>
               {activity}
