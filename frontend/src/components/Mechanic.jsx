@@ -24,6 +24,19 @@ function Mechanic() {
     setShowQuestions(true); // Mostrar las preguntas cuando se escribe en el input
   };
 
+  const handleSearchQuestions = async () => {
+    try {
+      const actividades = await axios.get(
+        "http://localhost:4000/select/activities"
+      );
+      setActivities(actividades.data.activityNames);
+      const response = await axios.get("http://localhost:4000/search");
+      setQuestions(response.data.question);
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
+    }
+  };
+
   useEffect(() => {
     handleSearchQuestions();
   }, []);
@@ -74,20 +87,7 @@ function Mechanic() {
         setError("Error al realizar la solicitud");
         setServerResponse("");
       }
-    }
-
-    const handleSearchQuestions = async () => {
-      try {
-        const actividades = await axios.get(
-          "http://localhost:4000/select/activities"
-        );
-        setActivities(actividades.data.activityNames);
-        const response = await axios.get("http://localhost:4000/search");
-        setQuestions(response.data.question);
-      } catch (error) {
-        console.error("Error al realizar la solicitud:", error);
-      }
-    };
+    }   
 
     const handleIdQuestion = (searchDescription) => {
       for (let question of questions) {
