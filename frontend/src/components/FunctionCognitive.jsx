@@ -39,7 +39,7 @@ function FunctionCognitive() {
     try {
       if (option != null) {
         const response = await axios.post(
-          "http://localhost:4000/newSearch/optionQuestion",
+          "https://backend-cogaf.onrender.com/newSearch/optionQuestion",
           { question: id, option: option }
         );
         setSelectedOption("");
@@ -48,7 +48,7 @@ function FunctionCognitive() {
       } else {
         console.log("Definida", id);
         const response = await axios.post(
-          "http://localhost:4000/newSearch/defineQuestion",
+          "https://backend-cogaf.onrender.com/newSearch/defineQuestion",
           {
             question: id,
           }
@@ -66,32 +66,32 @@ function FunctionCognitive() {
   const handleSearchQuestions = async () => {
     try {
       const test = await axios.get(
-        "http://localhost:4000/select/tests"
+        "https://backend-cogaf.onrender.com/select/tests"
       );
       setTest(test.data.testNames);
 
       const emotion = await axios.get(
-        "http://localhost:4000/select/emotions"
+        "https://backend-cogaf.onrender.com/select/emotions"
       );
       setEmotion(emotion.data.emotions);
 
       const task = await axios.get(
-        "http://localhost:4000/select/tasks"
+        "https://backend-cogaf.onrender.com/select/tasks"
       );
       setTask(task.data.taskNames);
 
       const capability = await axios.get(
-        "http://localhost:4000/select/capabilities"
+        "https://backend-cogaf.onrender.com/select/capabilities"
       );
       setCapability(capability.data.capabilityNames);
       
       const age = await axios.get(
-        "http://localhost:4000/select/age-rank"
+        "https://backend-cogaf.onrender.com/select/age-rank"
       );
       setEdad(age.data.ageRanks);
       
 
-      const response = await axios.get("http://localhost:4000/search");
+      const response = await axios.get("https://backend-cogaf.onrender.com/search");
       setQuestions(response.data.question);
     } catch (error) {
       console.error("Error al realizar la solicitud:", error);

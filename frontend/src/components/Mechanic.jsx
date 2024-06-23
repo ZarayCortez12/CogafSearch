@@ -37,7 +37,7 @@ function Mechanic() {
     try {
       if (option != null) {
         const response = await axios.post(
-          "http://localhost:4000/newSearch/optionQuestion",
+          "https://backend-cogaf.onrender.com/newSearch/optionQuestion",
           { question: id, option: option }
         );
         setSelectedOption("");
@@ -46,7 +46,7 @@ function Mechanic() {
       } else {
         console.log("Definida", id);
         const response = await axios.post(
-          "http://localhost:4000/newSearch/defineQuestion",
+          "https://backend-cogaf.onrender.com/newSearch/defineQuestion",
           {
             question: id,
           }
@@ -64,10 +64,10 @@ function Mechanic() {
   const handleSearchQuestions = async () => {
     try {
       const actividades = await axios.get(
-        "http://localhost:4000/select/activities"
+        "https://backend-cogaf.onrender.com/select/activities"
       );
       setActivities(actividades.data.activityNames);
-      const response = await axios.get("http://localhost:4000/search");
+      const response = await axios.get("https://backend-cogaf.onrender.com/search");
       setQuestions(response.data.question);
     } catch (error) {
       console.error("Error al realizar la solicitud:", error);
