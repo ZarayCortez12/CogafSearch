@@ -4,7 +4,7 @@ import { defineQuestion, optionQuestion } from "../controllers/newSearhc.control
 const router = express.Router();
 
 // Peticiones GET
-router.get("/defineQuestion", defineQuestion);
-router.get("/optionQuestion", optionQuestion);
+router.post("/defineQuestion", defineQuestion);
+router.post("/optionQuestion", optionQuestion);
 
 export default router;

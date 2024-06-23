@@ -35,194 +35,195 @@ function Mechanic() {
 
   const handleSearch = async (id, option) => {
     const question = id || inputValue;
-    const questionObject = { question: question };
 
     try {
-        console.log("question: ", question);
-        if (option != null) {
-          const response = await axios.get(
-            "http://localhost:4000/optionQuestion",
-            { questionObject, option }
-          );
-          setServerResponse(response);
-          setError("");
-
-        } else {
-          console.log("Definida", questionObject);
-          const response = await axios.get(
-            "http://localhost:4000/newSearch/defineQuestion",
-            { params: questionObject }    
+      console.log("question: ", question);
+      if (option != null) {
+        const response = await axios.post(
+          "http://localhost:4000/optionQuestion",
+          { question: id, option: option }
         );
-          console.log(response);
-          setServerResponse(response);
-          setError("");
-        }
-      
-      } catch (error) {
-        console.error("Error al realizar la solicitud:", error);
-        setError("Error al realizar la solicitud");
-        setServerResponse("");
-      }
-    };
-
-    const handleSearchQuestions = async () => {
-      try {
-        const actividades = await axios.get(
-          "http://localhost:4000/select/activities"
+        console.log("response: ", response);
+        setServerResponse(response);
+        setError("");
+      } else {
+        console.log("Definida", id);
+        const response = await axios.post(
+          "http://localhost:4000/newSearch/defineQuestion",
+          {
+            question: id,
+          }
         );
-        setActivities(actividades.data.activityNames);
-        const response = await axios.get("http://localhost:4000/search");
-        setQuestions(response.data.question);
-      } catch (error) {
-        console.error("Error al realizar la solicitud:", error);
-      }
-    };
+        console.log("response: ", response.data.message);
 
-    const handleIdQuestion = (searchDescription) => {
-      for (let question of questions) {
-        if (question.description === searchDescription) {
-          return question.id_question;
-        }
+        setServerResponse(response.data.message);
+        setError("");
       }
-      return null; // Devuelve null si no se encuentra la pregunta
-    };
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
+      setError("Error al realizar la solicitud");
+      setServerResponse("");
+    }
+  };
 
-    const handleBackgroundChange = () => {
-      setBackgroundColor(
-        backgroundColor === "bg-while" ? "bg-black" : "bg-while"
+  const handleSearchQuestions = async () => {
+    try {
+      const actividades = await axios.get(
+        "http://localhost:4000/select/activities"
       );
-    };
+      setActivities(actividades.data.activityNames);
+      const response = await axios.get("http://localhost:4000/search");
+      setQuestions(response.data.question);
+    } catch (error) {
+      console.error("Error al realizar la solicitud:", error);
+    }
+  };
 
-    const handleQuestionClick = (question) => {
-      setInputValue(question);
-
-      // Verificar si se trata de la pregunta específica manejada por el select
-      if (
-        !question
-          .toLowerCase()
-          .includes("what are the mechanics corresponding to _______ ?")
-      ) {
-        // Solo llamar a handleSearch si no es la pregunta específica
-        const id = handleIdQuestion(question);
-        handleSearch(id, null);
+  const handleIdQuestion = (searchDescription) => {
+    for (let question of questions) {
+      if (question.description === searchDescription) {
+        return question.id_question;
       }
+    }
+    return null; // Devuelve null si no se encuentra la pregunta
+  };
 
-      setShowQuestions(false); // Ocultar las preguntas cuando se hace clic en una de ellas
-    };
-
-    function renderQuestions() {
-      const filteredQuestions = questions.filter(
-        (question) =>
-          question.type === "M" &&
-          question.description.toLowerCase().includes(inputValue.toLowerCase())
-      );
-
-      return filteredQuestions.map((question, index) => (
-        <div
-          className="flex items-center p-2 bg-white shadow-lg w-8/12 relative cursor-pointer hover:bg-green-200"
-          key={index}
-          onClick={() => handleQuestionClick(question.description)}
-        >
-          <h1>{question.description}</h1>
-        </div>
-      ));
-    };
-
-    // Renderizar el select si la pregunta específica está presente en inputValue
-    const renderSelect = () => {
-      if (
-        inputValue
-          .toLowerCase()
-          .includes("what are the mechanics corresponding to _______ ?")
-      ) {
-        return (
-          <select
-            className="ml-4 outline-none p-2 border rounded"
-            value={selectedOption}
-            onChange={(e) => {
-              const selectedValue = e.target.value;
-              setSelectedOption(selectedValue);
-
-              // Reemplazar la _____ en la pregunta con la opción seleccionada
-              const updatedInputValue = inputValue.replace(
-                "_______",
-                selectedValue
-              );
-              setInputValue(updatedInputValue);
-
-              // Llamar a handleSearch con la pregunta actualizada
-              handleSearch(updatedInputValue, selectedValue);
-            }}
-          >
-            <option value="">the complementary activity</option>
-            {activities.map((activity, index) => (
-              <option key={index} value={activity}>
-                {activity}
-              </option>
-            ))}
-          </select>
-        );
-      }
-      return null;
-    };
-
-    return (
-      <>
-        <NavBar onBackgroundChange={handleBackgroundChange} />
-
-        <div className="bg-green-300 flex flex-col items-center justify-center p-20">
-          <h1 className="text-3xl mb-10 font-serif font-bold">
-            What do you want to consult today?
-          </h1>
-
-          <div className="flex items-center mt-4 w-9/12">
-            <div className="flex items-center border rounded-full p-2 bg-white shadow-lg w-full relative">
-              <input
-                type="text"
-                placeholder="Write your question here..."
-                className="flex-grow outline-none pl-6 w-full"
-                value={inputValue}
-                onChange={handleChange}
-              />
-              {inputValue.length > 0 && (
-                <IoCloseOutline
-                  className="text-green-300 text-3xl ml-2 cursor-pointer"
-                  onClick={clearInput}
-                />
-              )}
-              <IoSearchCircleSharp
-                className="text-green-300 text-3xl ml-2 cursor-pointer"
-                onClick={() => handleSearch(inputValue)}
-              />
-            </div>
-
-            {renderSelect != null && renderSelect()}
-
-            {/* Llamar a la función renderSelect para mostrar el select */}
-          </div>
-          {inputValue.length > 0 && showQuestions && (
-            <div className="mt-0 w-full flex flex-col items-center justify-center">
-              {renderQuestions()}
-            </div>
-          )}
-        </div>
-
-        {error && <NoEncontrado backgroundColor={backgroundColor} />}
-
-        {serverResponse && (
-          <Encontrado
-            backgroundColor={backgroundColor}
-            mensaje={serverResponse.mensaje}
-          />
-        )}
-
-        {!error && !serverResponse && (
-          <Preguntas
-            backgroundColor={backgroundColor}
-            onQuestionClick={handleQuestionClick}
-          />
-        )}
-      </>
+  const handleBackgroundChange = () => {
+    setBackgroundColor(
+      backgroundColor === "bg-while" ? "bg-black" : "bg-while"
     );
   };
+
+  const handleQuestionClick = (question) => {
+    setInputValue(question);
+
+    // Verificar si se trata de la pregunta específica manejada por el select
+    if (
+      !question
+        .toLowerCase()
+        .includes("what are the mechanics corresponding to _______ ?")
+    ) {
+      // Solo llamar a handleSearch si no es la pregunta específica
+      const id = handleIdQuestion(question);
+      handleSearch(id, null);
+    }
+
+    setShowQuestions(false); // Ocultar las preguntas cuando se hace clic en una de ellas
+  };
+
+  function renderQuestions() {
+    const filteredQuestions = questions.filter(
+      (question) =>
+        question.type === "M" &&
+        question.description.toLowerCase().includes(inputValue.toLowerCase())
+    );
+
+    return filteredQuestions.map((question, index) => (
+      <div
+        className="flex items-center p-2 bg-white shadow-lg w-8/12 relative cursor-pointer hover:bg-green-200"
+        key={index}
+        onClick={() => handleQuestionClick(question.description)}
+      >
+        <h1>{question.description}</h1>
+      </div>
+    ));
+  }
+
+  // Renderizar el select si la pregunta específica está presente en inputValue
+  const renderSelect = () => {
+    if (
+      inputValue
+        .toLowerCase()
+        .includes("what are the mechanics corresponding to _______ ?")
+    ) {
+      return (
+        <select
+          className="ml-4 outline-none p-2 border rounded"
+          value={selectedOption}
+          onChange={(e) => {
+            const selectedValue = e.target.value;
+            setSelectedOption(selectedValue);
+
+            // Reemplazar la _____ en la pregunta con la opción seleccionada
+            const updatedInputValue = inputValue.replace(
+              "_______",
+              selectedValue
+            );
+            setInputValue(updatedInputValue);
+
+            // Llamar a handleSearch con la pregunta actualizada
+            handleSearch(updatedInputValue, selectedValue);
+          }}
+        >
+          <option value="">the complementary activity</option>
+          {activities.map((activity, index) => (
+            <option key={index} value={activity}>
+              {activity}
+            </option>
+          ))}
+        </select>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <>
+      <NavBar onBackgroundChange={handleBackgroundChange} />
+
+      <div className="bg-green-300 flex flex-col items-center justify-center p-20">
+        <h1 className="text-3xl mb-10 font-serif font-bold">
+          What do you want to consult today?
+        </h1>
+
+        <div className="flex items-center mt-4 w-9/12">
+          <div className="flex items-center border rounded-full p-2 bg-white shadow-lg w-full relative">
+            <input
+              type="text"
+              placeholder="Write your question here..."
+              className="flex-grow outline-none pl-6 w-full"
+              value={inputValue}
+              onChange={handleChange}
+            />
+            {inputValue.length > 0 && (
+              <IoCloseOutline
+                className="text-green-300 text-3xl ml-2 cursor-pointer"
+                onClick={clearInput}
+              />
+            )}
+            <IoSearchCircleSharp
+              className="text-green-300 text-3xl ml-2 cursor-pointer"
+              onClick={() => handleSearch(inputValue)}
+            />
+          </div>
+
+          {renderSelect != null && renderSelect()}
+
+          {/* Llamar a la función renderSelect para mostrar el select */}
+        </div>
+        {inputValue.length > 0 && showQuestions && (
+          <div className="mt-0 w-full flex flex-col items-center justify-center">
+            {renderQuestions()}
+          </div>
+        )}
+      </div>
+
+      {error && <NoEncontrado backgroundColor={backgroundColor} />}
+
+      {serverResponse && (
+        <Encontrado
+          backgroundColor={backgroundColor}
+          mensaje={serverResponse}
+        />
+      )}
+
+      {!error && !serverResponse && (
+        <Preguntas
+          backgroundColor={backgroundColor}
+          onQuestionClick={handleQuestionClick}
+        />
+      )}
+    </>
+  );
+}
 export default Mechanic;
