@@ -24,19 +24,6 @@ function Mechanic() {
     setShowQuestions(true); // Mostrar las preguntas cuando se escribe en el input
   };
 
-  const handleSearchQuestions = async () => {
-    try {
-      const actividades = await axios.get(
-        "http://localhost:4000/select/activities"
-      );
-      setActivities(actividades.data.activityNames);
-      const response = await axios.get("http://localhost:4000/search");
-      setQuestions(response.data.question);
-    } catch (error) {
-      console.error("Error al realizar la solicitud:", error);
-    }
-  };
-
   useEffect(() => {
     handleSearchQuestions();
   }, []);
@@ -46,26 +33,11 @@ function Mechanic() {
     setSearchResults([]);
   };
 
-  const handleSearch = async (query, option) => {
-    const question = query || inputValue;
+  const handleSearch = async (id, option) => {
+    const question = id || inputValue;
+    const questionObject = { question: question };
 
-    if (
-      (question.trim() &&
-        !question
-          .toLowerCase()
-          .includes(
-            "what are the mechanics corresponding to x complementary activity?"
-          )) ||
-      (question.trim() &&
-        question
-          .toLowerCase()
-          .includes(
-            "what are the mechanics corresponding to x complementary activity?"
-          ) &&
-        option)
-    ) {
-      try {
-        let response;
+    try {
         console.log("question: ", question);
         if (option != null) {
           const response = await axios.get(
@@ -74,20 +46,37 @@ function Mechanic() {
           );
           setServerResponse(response);
           setError("");
-        } else {
-          response = await axios.post("http://localhost:4000/defineQuestion", {
-            question,
-          });
-        }
 
-        setServerResponse(response.data);
-        setError("");
+        } else {
+          console.log("Definida", questionObject);
+          const response = await axios.get(
+            "http://localhost:4000/newSearch/defineQuestion",
+            { params: questionObject }    
+        );
+          console.log(response);
+          setServerResponse(response);
+          setError("");
+        }
+      
       } catch (error) {
         console.error("Error al realizar la solicitud:", error);
         setError("Error al realizar la solicitud");
         setServerResponse("");
       }
-    }   
+    };
+
+    const handleSearchQuestions = async () => {
+      try {
+        const actividades = await axios.get(
+          "http://localhost:4000/select/activities"
+        );
+        setActivities(actividades.data.activityNames);
+        const response = await axios.get("http://localhost:4000/search");
+        setQuestions(response.data.question);
+      } catch (error) {
+        console.error("Error al realizar la solicitud:", error);
+      }
+    };
 
     const handleIdQuestion = (searchDescription) => {
       for (let question of questions) {
@@ -137,7 +126,7 @@ function Mechanic() {
           <h1>{question.description}</h1>
         </div>
       ));
-    }
+    };
 
     // Renderizar el select si la pregunta específica está presente en inputValue
     const renderSelect = () => {
@@ -236,5 +225,4 @@ function Mechanic() {
       </>
     );
   };
-}
 export default Mechanic;
