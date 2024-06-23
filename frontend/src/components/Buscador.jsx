@@ -11,7 +11,7 @@ function Buscador() {
   const handleSearchQuestions = async () => {
     try {
       const response = await axios.get("http://localhost:4000/search");
-      setQuestions(response.data.question);
+      console.log(response.data);
     } catch (error) {
       console.error("Error al realizar la solicitud:", error);
     }
