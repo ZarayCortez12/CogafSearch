@@ -34,15 +34,15 @@ function Mechanic() {
   };
 
   const handleSearch = async (id, option) => {
-    const question = id || inputValue;
-
     try {
-      console.log("question: ", question);
+      console.log("question: ", id);
+      console.log("option: ", option);
       if (option != null) {
         const response = await axios.post(
           "http://localhost:4000/optionQuestion",
           { question: id, option: option }
         );
+
         console.log("response: ", response);
         setServerResponse(response);
         setError("");
