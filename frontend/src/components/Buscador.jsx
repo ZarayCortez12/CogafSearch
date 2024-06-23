@@ -4,18 +4,7 @@ import { Link } from 'react-router-dom';
 
 function Buscador() {
   
-  useEffect(() => {
-    handleSearchQuestions();
-  }, []);
 
-  const handleSearchQuestions = async () => {
-    try {
-      const response = await axios.get("http://localhost:4000/search");
-      setQuestions(response.data.question);
-    } catch (error) {
-      console.error("Error al realizar la solicitud:", error);
-    }
-  };
 
   return (
     <>
