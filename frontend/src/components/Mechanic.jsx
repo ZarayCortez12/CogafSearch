@@ -136,13 +136,15 @@ function Mechanic() {
         .toLowerCase()
         .includes("what are the mechanics corresponding to _______ ?")
     ) {
+      const id = handleIdQuestion(inputValue);
+      console.log(id);
       return (
         <select
           className="ml-4 outline-none p-2 border rounded"
           value={selectedOption}
           onChange={(e) => {
             const selectedValue = e.target.value;
-            setSelectedOption(selectedValue);
+            setSelectedOption( e.target.value);
 
             // Reemplazar la _____ en la pregunta con la opción seleccionada
             const updatedInputValue = inputValue.replace(
@@ -152,7 +154,7 @@ function Mechanic() {
             setInputValue(updatedInputValue);
 
             // Llamar a handleSearch con la pregunta actualizada
-            handleSearch(updatedInputValue, selectedValue);
+            handleSearch(id, selectedValue);
           }}
         >
           <option value="">the complementary activity</option>
